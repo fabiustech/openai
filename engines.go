@@ -2,8 +2,8 @@ package openai
 
 import (
 	"context"
-	"fmt"
-	"net/http"
+	"encoding/json"
+	"path"
 )
 
 // Engine struct represents engine from OpenAPI API.
@@ -16,35 +16,45 @@ type Engine struct {
 
 // EnginesList is a list of engines.
 type EnginesList struct {
-	Engines []Engine `json:"data"`
+	Engines []*Engine `json:"data"`
 }
+
+const routeEngines = "engines"
 
 // ListEngines Lists the currently available engines, and provides basic
 // information about each option such as the owner and availability.
-func (c *Client) ListEngines(ctx context.Context) (engines EnginesList, err error) {
-	req, err := http.NewRequest("GET", c.fullURL("/engines"), nil)
+//
+// Deprecated: Please use their replacement, Models, instead.
+// https://beta.openai.com/docs/api-reference/models
+func (c *Client) ListEngines(ctx context.Context) (*EnginesList, error) {
+	var b, err = c.get(ctx, routeEngines)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	req = req.WithContext(ctx)
-	err = c.sendRequest(req, &engines)
-	return
+	var el *EnginesList
+	if err = json.Unmarshal(b, el); err != nil {
+		return nil, err
+	}
+
+	return el, nil
 }
 
 // GetEngine Retrieves an engine instance, providing basic information about
 // the engine such as the owner and availability.
-func (c *Client) GetEngine(
-	ctx context.Context,
-	engineID string,
-) (engine Engine, err error) {
-	urlSuffix := fmt.Sprintf("/engines/%s", engineID)
-	req, err := http.NewRequest("GET", c.fullURL(urlSuffix), nil)
+//
+// Deprecated: Please use their replacement, Models, instead.
+// https://beta.openai.com/docs/api-reference/models
+func (c *Client) GetEngine(ctx context.Context, id string) (*Engine, error) {
+	var b, err = c.get(ctx, path.Join(routeEngines, id))
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	req = req.WithContext(ctx)
-	err = c.sendRequest(req, &engine)
-	return
+	var e *Engine
+	if err = json.Unmarshal(b, e); err != nil {
+		return nil, err
+	}
+
+	return e, nil
 }

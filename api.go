@@ -1,85 +1,206 @@
 package openai
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"net/url"
+	"os"
+	"path"
+	"strings"
 )
 
-const apiURLv1 = "https://api.openai.com/v1"
+const (
+	scheme   = "https"
+	host     = "api.openai.com"
+	basePath = "vi"
+)
 
-func newTransport() *http.Client {
-	return &http.Client{}
+func reqURL(route string) string {
+	var u = &url.URL{
+		Scheme: scheme,
+		Host:   host,
+		Path:   path.Join(basePath, route),
+	}
+	return u.String()
 }
 
 // Client is OpenAI GPT-3 API client.
 type Client struct {
-	BaseURL    string
-	HTTPClient *http.Client
-	authToken  string
-	idOrg      string
+	token string
+	orgID *string
 }
 
 // NewClient creates new OpenAI API client.
-func NewClient(authToken string) *Client {
+func NewClient(token string) *Client {
 	return &Client{
-		BaseURL:    apiURLv1,
-		HTTPClient: newTransport(),
-		authToken:  authToken,
-		idOrg:      "",
+		token: token,
 	}
 }
 
-// NewOrgClient creates new OpenAI API client for specified Organization ID.
-func NewOrgClient(authToken, org string) *Client {
+// NewClientWithOrg creates new OpenAI API client for specified Organization ID.
+func NewClientWithOrg(token, org string) *Client {
 	return &Client{
-		BaseURL:    apiURLv1,
-		HTTPClient: newTransport(),
-		authToken:  authToken,
-		idOrg:      org,
+		token: token,
+		orgID: &org,
 	}
 }
 
-func (c *Client) sendRequest(req *http.Request, v interface{}) error {
-	req.Header.Set("Accept", "application/json; charset=utf-8")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.authToken))
+func (c *Client) post(ctx context.Context, path string, payload any) ([]byte, error) {
+	var b, err = json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
 
-	// Check whether Content-Type is already set, Upload Files API requires
-	// Content-Type == multipart/form-data
-	contentType := req.Header.Get("Content-Type")
-	if contentType == "" {
+	var req *http.Request
+	req, err = http.NewRequestWithContext(ctx, "POST", reqURL(path), bytes.NewBuffer(b))
+	if err != nil {
+		return nil, err
+	}
+
+	switch payload.(type) {
+	case FileRequest:
+		req.Header.Set("Content-Type", "") // TODO
+	default:
 		req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	}
 
-	if len(c.idOrg) > 0 {
-		req.Header.Set("OpenAI-Organization", c.idOrg)
+	if c.orgID != nil {
+		req.Header.Set("OpenAI-Organization", *c.orgID)
 	}
 
-	res, err := c.HTTPClient.Do(req)
+	var resp *http.Response
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if err = interpretResponse(resp); err != nil {
+		return nil, err
+	}
+
+	return io.ReadAll(resp.Body)
+}
+
+// TODO: improve this.
+func (c *Client) postFile(ctx context.Context, fr *FileRequest) ([]byte, error) {
+	var b bytes.Buffer
+	w := multipart.NewWriter(&b)
+
+	var pw, err = w.CreateFormField("purpose")
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = io.Copy(pw, strings.NewReader(fr.Purpose))
+	if err != nil {
+		return nil, err
+	}
+
+	var fw io.Writer
+	fw, err = w.CreateFormFile("file", fr.FileName)
+	if err != nil {
+		return nil, err
+	}
+
+	var fileData io.ReadCloser
+	if isURL(fr.FilePath) {
+		var remoteFile *http.Response
+		remoteFile, err = http.Get(fr.FilePath)
+		if err != nil {
+			return nil, err
+		}
+
+		defer remoteFile.Body.Close()
+
+		// Check server response
+		if remoteFile.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("error, status code: %d, message: failed to fetch file", remoteFile.StatusCode)
+		}
+
+		fileData = remoteFile.Body
+	} else {
+		fileData, err = os.Open(fr.FilePath)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	_, err = io.Copy(fw, fileData)
+	if err != nil {
+		return nil, err
+	}
+
+	w.Close()
+
+	var req *http.Request
+	req, err = http.NewRequestWithContext(ctx, "POST", reqURL(routeFiles), &b)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", w.FormDataContentType())
+
+	var resp *http.Response
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if err = interpretResponse(resp); err != nil {
+		return nil, err
+	}
+
+	return io.ReadAll(resp.Body)
+}
+
+func (c *Client) get(ctx context.Context, path string) ([]byte, error) {
+	var req, err = http.NewRequestWithContext(ctx, "POST", reqURL(path), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.orgID != nil {
+		req.Header.Set("OpenAI-Organization", *c.orgID)
+	}
+
+	var resp *http.Response
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if err = interpretResponse(resp); err != nil {
+		return nil, err
+	}
+
+	return io.ReadAll(resp.Body)
+}
+
+func (c *Client) delete(ctx context.Context, path string) error {
+	var req, err = http.NewRequestWithContext(ctx, "DELETE", reqURL(path), nil)
 	if err != nil {
 		return err
 	}
 
-	defer res.Body.Close()
-
-	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		var errRes ErrorResponse
-		err = json.NewDecoder(res.Body).Decode(&errRes)
-		if err != nil || errRes.Error == nil {
-			return fmt.Errorf("error, status code: %d", res.StatusCode)
-		}
-		return fmt.Errorf("error, status code: %d, message: %s", res.StatusCode, errRes.Error.Message)
+	var resp *http.Response
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		return err
 	}
+	defer resp.Body.Close()
 
-	if v != nil {
-		if err = json.NewDecoder(res.Body).Decode(&v); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return interpretResponse(resp)
 }
 
-func (c *Client) fullURL(suffix string) string {
-	return fmt.Sprintf("%s%s", c.BaseURL, suffix)
+// TODO: implement.
+func interpretResponse(resp *http.Response) error {
+	return nil
 }

@@ -29,22 +29,39 @@ func (e *Embedding) UnmarshalText(b []byte) error {
 
 const (
 	Unknown Embedding = iota
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	AdaSimilarity
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	BabbageSimilarity
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	CurieSimilarity
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	DavinciSimilarity
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	AdaSearchDocument
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	AdaSearchQuery
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	BabbageSearchDocument
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	BabbageSearchQuery
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	CurieSearchDocument
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	CurieSearchQuery
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	DavinciSearchDocument
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	DavinciSearchQuery
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	AdaCodeSearchCode
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	AdaCodeSearchText
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	BabbageCodeSearchCode
+	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	BabbageCodeSearchText
+
 	AdaEmbeddingV2
 )
 

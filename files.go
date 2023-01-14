@@ -1,17 +1,13 @@
 package openai
 
 import (
-	"bytes"
 	"context"
-	"fmt"
-	"io"
-	"mime/multipart"
-	"net/http"
+	"encoding/json"
 	"net/url"
-	"os"
-	"strings"
+	"path"
 )
 
+// FileRequest ...
 type FileRequest struct {
 	FileName string `json:"file"`
 	FilePath string `json:"-"`
@@ -52,105 +48,55 @@ func isURL(path string) bool {
 
 // CreateFile uploads a jsonl file to GPT3
 // FilePath can be either a local file path or a URL.
-func (c *Client) CreateFile(ctx context.Context, request FileRequest) (file File, err error) {
-	var b bytes.Buffer
-	w := multipart.NewWriter(&b)
-
-	var fw, pw io.Writer
-	pw, err = w.CreateFormField("purpose")
+func (c *Client) CreateFile(ctx context.Context, fr *FileRequest) (*File, error) {
+	var b, err = c.postFile(ctx, fr)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	_, err = io.Copy(pw, strings.NewReader(request.Purpose))
-	if err != nil {
-		return
+	var f *File
+	if err = json.Unmarshal(b, f); err != nil {
+		return nil, err
 	}
 
-	fw, err = w.CreateFormFile("file", request.FileName)
-	if err != nil {
-		return
-	}
-
-	var fileData io.ReadCloser
-	if isURL(request.FilePath) {
-		var remoteFile *http.Response
-		remoteFile, err = http.Get(request.FilePath)
-		if err != nil {
-			return
-		}
-
-		defer remoteFile.Body.Close()
-
-		// Check server response
-		if remoteFile.StatusCode != http.StatusOK {
-			err = fmt.Errorf("error, status code: %d, message: failed to fetch file", remoteFile.StatusCode)
-			return
-		}
-
-		fileData = remoteFile.Body
-	} else {
-		fileData, err = os.Open(request.FilePath)
-		if err != nil {
-			return
-		}
-	}
-
-	_, err = io.Copy(fw, fileData)
-	if err != nil {
-		return
-	}
-
-	w.Close()
-
-	req, err := http.NewRequest("POST", c.fullURL("/files"), &b)
-	if err != nil {
-		return
-	}
-
-	req = req.WithContext(ctx)
-	req.Header.Set("Content-Type", w.FormDataContentType())
-
-	err = c.sendRequest(req, &file)
-
-	return
+	return f, nil
 }
 
-// DeleteFile deletes an existing file.
-func (c *Client) DeleteFile(ctx context.Context, fileID string) (err error) {
-	req, err := http.NewRequest("DELETE", c.fullURL("/files/"+fileID), nil)
-	if err != nil {
-		return
-	}
+const routeFiles = "files"
 
-	req = req.WithContext(ctx)
-	err = c.sendRequest(req, nil)
-	return
+// DeleteFile deletes an existing file.
+func (c *Client) DeleteFile(ctx context.Context, id string) error {
+	return c.delete(ctx, path.Join(routeFiles, id))
 }
 
 // ListFiles Lists the currently available files,
 // and provides basic information about each file such as the file name and purpose.
-func (c *Client) ListFiles(ctx context.Context) (files FilesList, err error) {
-	req, err := http.NewRequest("GET", c.fullURL("/files"), nil)
+func (c *Client) ListFiles(ctx context.Context) (*FilesList, error) {
+	var b, err = c.get(ctx, routeFiles)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	req = req.WithContext(ctx)
-	err = c.sendRequest(req, &files)
-	return
+	var fl *FilesList
+	if err = json.Unmarshal(b, fl); err != nil {
+		return nil, err
+	}
+
+	return fl, nil
 }
 
 // GetFile Retrieves a file instance, providing basic information about the file
 // such as the file name and purpose.
-func (c *Client) GetFile(ctx context.Context, fileID string) (file File, err error) {
-	urlSuffix := fmt.Sprintf("/files/%s", fileID)
-	req, err := http.NewRequest("GET", c.fullURL(urlSuffix), nil)
+func (c *Client) GetFile(ctx context.Context, id string) (*File, error) {
+	var b, err = c.get(ctx, path.Join(routeFiles, id))
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	req = req.WithContext(ctx)
-	err = c.sendRequest(req, &file)
-	return
+	var f *File
+	if err = json.Unmarshal(b, f); err != nil {
+		return nil, err
+	}
+
+	return f, nil
 }

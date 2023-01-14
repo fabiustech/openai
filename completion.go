@@ -1,17 +1,16 @@
 package openai
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"net/http"
+	"github.com/fabiustech/openai/models"
 )
 
 // CompletionRequest represents a request structure for Completion API.
 type CompletionRequest struct {
 	// Model specifies the ID of the model to use.
 	// See more here: https://beta.openai.com/docs/models/overview
-	Model string `json:"model"`
+	Model models.Completion `json:"model"`
 	// Prompt specifies the prompt(s) to generate completions for, encoded as a string, array of strings, array of tokens,
 	// or array of token arrays. Note that <|endoftext|> is the document separator that the model sees during
 	// training, so if a prompt is not specified the model will generate as if from the beginning of a new document.
@@ -91,10 +90,10 @@ type CompletionRequest struct {
 
 // CompletionChoice represents one of possible completions.
 type CompletionChoice struct {
-	Text         string        `json:"text"`
-	Index        int           `json:"index"`
-	FinishReason string        `json:"finish_reason"`
-	LogProbs     LogprobResult `json:"logprobs"`
+	Text         string         `json:"text"`
+	Index        int            `json:"index"`
+	FinishReason string         `json:"finish_reason"`
+	LogProbs     *LogprobResult `json:"logprobs"`
 }
 
 // LogprobResult represents logprob result of Choice.
@@ -107,35 +106,29 @@ type LogprobResult struct {
 
 // CompletionResponse represents a response structure for completion API.
 type CompletionResponse struct {
-	ID      string             `json:"id"`
-	Object  string             `json:"object"`
-	Created uint64             `json:"created"`
-	Model   string             `json:"model"`
-	Choices []CompletionChoice `json:"choices"`
-	Usage   Usage              `json:"usage"`
+	ID      string              `json:"id"`
+	Object  string              `json:"object"`
+	Created uint64              `json:"created"`
+	Model   models.Completion   `json:"model"`
+	Choices []*CompletionChoice `json:"choices"`
+	Usage   *Usage              `json:"usage"`
 }
+
+const routeCompletions = "completions"
 
 // CreateCompletion — API call to create a completion. This is the main endpoint of the API. Returns new text as well
 // as, if requested, the probabilities over each alternative token at each position.
 //
 // If using a fine-tuned model, simply provide the model's ID in the CompletionRequest object,
 // and the server will use the model's parameters to generate the completion.
-func (c *Client) CreateCompletion(ctx context.Context, cr CompletionRequest) (*CompletionResponse, error) {
-	var b, err = json.Marshal(cr)
+func (c *Client) CreateCompletion(ctx context.Context, cr *CompletionRequest) (*CompletionResponse, error) {
+	var b, err = c.post(ctx, routeCompletions, cr)
 	if err != nil {
 		return nil, err
 	}
-
-	urlSuffix := "/completions"
-	var req *http.Request
-	req, err = http.NewRequest("POST", c.fullURL(urlSuffix), bytes.NewBuffer(b))
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
 
 	var resp *CompletionResponse
-	if err = c.sendRequest(req, resp); err != nil {
+	if err = json.Unmarshal(b, resp); err != nil {
 		return nil, err
 	}
 

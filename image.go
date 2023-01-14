@@ -1,13 +1,12 @@
 package openai
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"net/http"
 )
 
 // Image sizes defined by the OpenAI API.
+// TODO: make enum.
 const (
 	CreateImageSize256x256   = "256x256"
 	CreateImageSize512x512   = "512x512"
@@ -34,27 +33,32 @@ type ImageResponse struct {
 	Data    []ImageResponseDataInner `json:"data,omitempty"`
 }
 
-// ImageResponseData represents a response data structure for image API.
+// ImageResponseDataInner represents a response data structure for image API.
 type ImageResponseDataInner struct {
 	URL     string `json:"url,omitempty"`
 	B64JSON string `json:"b64_json,omitempty"`
 }
 
+const (
+	routeGenerations = "images/generations"
+	routeEdits       = "images/edits"
+	routeVariations  = "images/variations"
+)
+
 // CreateImage - API call to create an image. This is the main endpoint of the DALL-E API.
-func (c *Client) CreateImage(ctx context.Context, request ImageRequest) (response ImageResponse, err error) {
-	var reqBytes []byte
-	reqBytes, err = json.Marshal(request)
+func (c *Client) CreateImage(ctx context.Context, ir *ImageRequest) (*ImageResponse, error) {
+	var b, err = c.post(ctx, routeGenerations, ir)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	urlSuffix := "/images/generations"
-	req, err := http.NewRequest(http.MethodPost, c.fullURL(urlSuffix), bytes.NewBuffer(reqBytes))
-	if err != nil {
-		return
+	var resp *ImageResponse
+	if err = json.Unmarshal(b, resp); err != nil {
+		return nil, err
 	}
 
-	req = req.WithContext(ctx)
-	err = c.sendRequest(req, &response)
-	return
+	return resp, nil
 }
+
+// TODO: ImageEdit
+// TODO: ImageVariation

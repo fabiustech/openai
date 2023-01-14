@@ -1,11 +1,9 @@
 package openai
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"github.com/fabiustech/openai/models"
-	"net/http"
 )
 
 // Embedding is a special format of data representation that can be easily utilized by machine
@@ -44,23 +42,20 @@ type EmbeddingRequest struct {
 	User string `json:"user"`
 }
 
+const embeddingsRoute = "embeddings"
+
 // CreateEmbeddings returns an EmbeddingResponse which will contain an Embedding for every item in |request.Input|.
 // https://beta.openai.com/docs/api-reference/embeddings/create
-func (c *Client) CreateEmbeddings(ctx context.Context, request EmbeddingRequest) (resp EmbeddingResponse, err error) {
-	var reqBytes []byte
-	reqBytes, err = json.Marshal(request)
+func (c *Client) CreateEmbeddings(ctx context.Context, request *EmbeddingRequest) (*EmbeddingResponse, error) {
+	var b, err = c.post(ctx, embeddingsRoute, request)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	urlSuffix := "/embeddings"
-	req, err := http.NewRequest(http.MethodPost, c.fullURL(urlSuffix), bytes.NewBuffer(reqBytes))
-	if err != nil {
-		return
+	var resp *EmbeddingResponse
+	if err = json.Unmarshal(b, resp); err != nil {
+		return nil, err
 	}
 
-	req = req.WithContext(ctx)
-	err = c.sendRequest(req, &resp)
-
-	return
+	return resp, nil
 }
