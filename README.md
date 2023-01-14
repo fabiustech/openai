@@ -7,7 +7,7 @@
 
 Installation:
 ```
-go get github.com/sashabaranov/go-gpt3
+go get github.com/fabiustech/openai
 ```
 
 
@@ -19,15 +19,16 @@ package main
 import (
 	"context"
 	"fmt"
-	gogpt "github.com/sashabaranov/go-gpt3"
+
+	"github.com/fabiustech/openai"
 )
 
 func main() {
-	c := gogpt.NewClient("your token")
+	c := openai.NewClient("your token")
 	ctx := context.Background()
 
-	req := gogpt.CompletionRequest{
-		Model:     gogpt.GPT3Ada,
+	req := openai.CompletionRequest{
+		Model:     openai.GPT3Ada,
 		MaxTokens: 5,
 		Prompt:    "Lorem ipsum",
 	}
