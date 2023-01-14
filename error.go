@@ -1,4 +1,4 @@
-package gogpt
+package openai
 
 type ErrorResponse struct {
 	Error *struct {

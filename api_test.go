@@ -1,10 +1,11 @@
-package gogpt_test
+package openai_test
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/fabiustech/openai"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,8 +15,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	. "github.com/sashabaranov/go-gpt3"
 )
 
 const (
@@ -29,7 +28,7 @@ func TestAPI(t *testing.T) {
 	}
 
 	var err error
-	c := NewClient(apiToken)
+	c := openai.NewClient(apiToken)
 	ctx := context.Background()
 	_, err = c.ListEngines(ctx)
 	if err != nil {
@@ -53,12 +52,12 @@ func TestAPI(t *testing.T) {
 		}
 	} // else skip
 
-	embeddingReq := EmbeddingRequest{
+	embeddingReq := openai.EmbeddingRequest{
 		Input: []string{
 			"The food was delicious and the waiter",
 			"Other examples of embedding request",
 		},
-		Model: AdaSearchQuery,
+		Model: openai.AdaSearchQuery,
 	}
 	_, err = c.CreateEmbeddings(ctx, embeddingReq)
 	if err != nil {
@@ -74,11 +73,11 @@ func TestCompletions(t *testing.T) {
 	ts.Start()
 	defer ts.Close()
 
-	client := NewClient(testAPIToken)
+	client := openai.NewClient(testAPIToken)
 	ctx := context.Background()
 	client.BaseURL = ts.URL + "/v1"
 
-	req := CompletionRequest{
+	req := openai.CompletionRequest{
 		MaxTokens: 5,
 		Model:     "ada",
 	}
@@ -97,13 +96,13 @@ func TestEdits(t *testing.T) {
 	ts.Start()
 	defer ts.Close()
 
-	client := NewClient(testAPIToken)
+	client := openai.NewClient(testAPIToken)
 	ctx := context.Background()
 	client.BaseURL = ts.URL + "/v1"
 
 	// create an edit request
 	model := "ada"
-	editReq := EditsRequest{
+	editReq := openai.EditsRequest{
 		Model: &model,
 		Input: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
 			"sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim" +
@@ -122,26 +121,26 @@ func TestEdits(t *testing.T) {
 }
 
 func TestEmbedding(t *testing.T) {
-	embeddedModels := []EmbeddingModel{
-		AdaSimilarity,
-		BabbageSimilarity,
-		CurieSimilarity,
-		DavinciSimilarity,
-		AdaSearchDocument,
-		AdaSearchQuery,
-		BabbageSearchDocument,
-		BabbageSearchQuery,
-		CurieSearchDocument,
-		CurieSearchQuery,
-		DavinciSearchDocument,
-		DavinciSearchQuery,
-		AdaCodeSearchCode,
-		AdaCodeSearchText,
-		BabbageCodeSearchCode,
-		BabbageCodeSearchText,
+	embeddedModels := []openai.EmbeddingModel{
+		openai.AdaSimilarity,
+		openai.BabbageSimilarity,
+		openai.CurieSimilarity,
+		openai.DavinciSimilarity,
+		openai.AdaSearchDocument,
+		openai.AdaSearchQuery,
+		openai.BabbageSearchDocument,
+		openai.BabbageSearchQuery,
+		openai.CurieSearchDocument,
+		openai.CurieSearchQuery,
+		openai.DavinciSearchDocument,
+		openai.DavinciSearchQuery,
+		openai.AdaCodeSearchCode,
+		openai.AdaCodeSearchText,
+		openai.BabbageCodeSearchCode,
+		openai.BabbageCodeSearchText,
 	}
 	for _, model := range embeddedModels {
-		embeddingReq := EmbeddingRequest{
+		embeddingReq := openai.EmbeddingRequest{
 			Input: []string{
 				"The food was delicious and the waiter",
 				"Other examples of embedding request",
@@ -161,16 +160,16 @@ func TestEmbedding(t *testing.T) {
 }
 
 // getEditBody Returns the body of the request to create an edit.
-func getEditBody(r *http.Request) (EditsRequest, error) {
-	edit := EditsRequest{}
+func getEditBody(r *http.Request) (openai.EditsRequest, error) {
+	edit := openai.EditsRequest{}
 	// read the request body
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return EditsRequest{}, err
+		return openai.EditsRequest{}, err
 	}
 	err = json.Unmarshal(reqBody, &edit)
 	if err != nil {
-		return EditsRequest{}, err
+		return openai.EditsRequest{}, err
 	}
 	return edit, nil
 }
@@ -184,14 +183,14 @@ func handleEditEndpoint(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-	var editReq EditsRequest
+	var editReq openai.EditsRequest
 	editReq, err = getEditBody(r)
 	if err != nil {
 		http.Error(w, "could not read request", http.StatusInternalServerError)
 		return
 	}
 	// create a response
-	res := EditsResponse{
+	res := openai.EditsResponse{
 		Object:  "test-object",
 		Created: uint64(time.Now().Unix()),
 	}
@@ -201,12 +200,12 @@ func handleEditEndpoint(w http.ResponseWriter, r *http.Request) {
 	completionTokens := int(float32(len(editString))/4) * editReq.N
 	for i := 0; i < editReq.N; i++ {
 		// instruction will be hidden and only seen by OpenAI
-		res.Choices = append(res.Choices, EditsChoice{
+		res.Choices = append(res.Choices, openai.EditsChoice{
 			Text:  editReq.Input + editString,
 			Index: i,
 		})
 	}
-	res.Usage = Usage{
+	res.Usage = openai.Usage{
 		PromptTokens:     inputTokens,
 		CompletionTokens: completionTokens,
 		TotalTokens:      inputTokens + completionTokens,
@@ -224,12 +223,12 @@ func handleCompletionEndpoint(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-	var completionReq CompletionRequest
+	var completionReq openai.CompletionRequest
 	if completionReq, err = getCompletionBody(r); err != nil {
 		http.Error(w, "could not read request", http.StatusInternalServerError)
 		return
 	}
-	res := CompletionResponse{
+	res := openai.CompletionResponse{
 		ID:      strconv.Itoa(int(time.Now().Unix())),
 		Object:  "test-object",
 		Created: uint64(time.Now().Unix()),
@@ -245,14 +244,14 @@ func handleCompletionEndpoint(w http.ResponseWriter, r *http.Request) {
 		if completionReq.Echo {
 			completionStr = completionReq.Prompt + completionStr
 		}
-		res.Choices = append(res.Choices, CompletionChoice{
+		res.Choices = append(res.Choices, openai.CompletionChoice{
 			Text:  completionStr,
 			Index: i,
 		})
 	}
 	inputTokens := numTokens(completionReq.Prompt) * completionReq.N
 	completionTokens := completionReq.MaxTokens * completionReq.N
-	res.Usage = Usage{
+	res.Usage = openai.Usage{
 		PromptTokens:     inputTokens,
 		CompletionTokens: completionTokens,
 		TotalTokens:      inputTokens + completionTokens,
@@ -270,20 +269,20 @@ func handleImageEndpoint(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-	var imageReq ImageRequest
+	var imageReq openai.ImageRequest
 	if imageReq, err = getImageBody(r); err != nil {
 		http.Error(w, "could not read request", http.StatusInternalServerError)
 		return
 	}
-	res := ImageResponse{
+	res := openai.ImageResponse{
 		Created: uint64(time.Now().Unix()),
 	}
 	for i := 0; i < imageReq.N; i++ {
-		imageData := ImageResponseDataInner{}
+		imageData := openai.ImageResponseDataInner{}
 		switch imageReq.ResponseFormat {
-		case CreateImageResponseFormatURL, "":
+		case openai.CreateImageResponseFormatURL, "":
 			imageData.URL = "https://example.com/image.png"
-		case CreateImageResponseFormatB64JSON:
+		case openai.CreateImageResponseFormatB64JSON:
 			// This decodes to "{}" in base64.
 			imageData.B64JSON = "e30K"
 		default:
@@ -297,31 +296,31 @@ func handleImageEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 // getCompletionBody Returns the body of the request to create a completion.
-func getCompletionBody(r *http.Request) (CompletionRequest, error) {
-	completion := CompletionRequest{}
+func getCompletionBody(r *http.Request) (openai.CompletionRequest, error) {
+	completion := openai.CompletionRequest{}
 	// read the request body
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return CompletionRequest{}, err
+		return openai.CompletionRequest{}, err
 	}
 	err = json.Unmarshal(reqBody, &completion)
 	if err != nil {
-		return CompletionRequest{}, err
+		return openai.CompletionRequest{}, err
 	}
 	return completion, nil
 }
 
 // getImageBody Returns the body of the request to create a image.
-func getImageBody(r *http.Request) (ImageRequest, error) {
-	image := ImageRequest{}
+func getImageBody(r *http.Request) (openai.ImageRequest, error) {
+	image := openai.ImageRequest{}
 	// read the request body
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return ImageRequest{}, err
+		return openai.ImageRequest{}, err
 	}
 	err = json.Unmarshal(reqBody, &image)
 	if err != nil {
-		return ImageRequest{}, err
+		return openai.ImageRequest{}, err
 	}
 	return image, nil
 }
@@ -342,11 +341,11 @@ func TestImages(t *testing.T) {
 	ts.Start()
 	defer ts.Close()
 
-	client := NewClient(testAPIToken)
+	client := openai.NewClient(testAPIToken)
 	ctx := context.Background()
 	client.BaseURL = ts.URL + "/v1"
 
-	req := ImageRequest{}
+	req := openai.ImageRequest{}
 	req.Prompt = "Lorem ipsum"
 	_, err = client.CreateImage(ctx, req)
 	if err != nil {
