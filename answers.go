@@ -32,20 +32,24 @@ type AnswerResponse struct {
 	} `json:"selected_documents"`
 }
 
-// Search — perform a semantic search api call over a list of documents.
-func (c *Client) Answers(ctx context.Context, request AnswerRequest) (response AnswerResponse, err error) {
-	var reqBytes []byte
-	reqBytes, err = json.Marshal(request)
+// Answers ...
+func (c *Client) Answers(ctx context.Context, ar AnswerRequest) (*AnswerResponse, error) {
+	var b, err = json.Marshal(ar)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", c.fullURL("/answers"), bytes.NewBuffer(reqBytes))
+	var req *http.Request
+	req, err = http.NewRequest("POST", c.fullURL("/answers"), bytes.NewBuffer(b))
 	if err != nil {
-		return
+		return nil, err
 	}
-
 	req = req.WithContext(ctx)
-	err = c.sendRequest(req, &response)
-	return
+
+	var resp *AnswerResponse
+	if err = c.sendRequest(req, resp); err != nil {
+		return nil, err
+	}
+	
+	return resp, err
 }
