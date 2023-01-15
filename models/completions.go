@@ -1,3 +1,5 @@
+// Package models contains the enum values which represent the various
+// models used by all OpenAI endpoints.
 package models
 
 // Completion represents all models available for use with the Completions endpoint.

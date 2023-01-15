@@ -1,3 +1,5 @@
+// Package images contains the enum values which represent the various
+// image formats and sizes returned by the OpenAI image endpoints.
 package images
 
 // Format represents the enum values for the formats in which

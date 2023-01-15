@@ -1,3 +1,4 @@
+// Package routes contains constants for all OpenAI endpoint routes.
 package routes
 
 const (
