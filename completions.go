@@ -17,7 +17,7 @@ type CompletionRequest struct {
 	// or array of token arrays. Note that <|endoftext|> is the document separator that the model sees during
 	// training, so if a prompt is not specified the model will generate as if from the beginning of a new document.
 	// Defaults to <|endoftext|>.
-	Prompt *string `json:"prompt,omitempty"`
+	Prompt string `json:"prompt,omitempty"`
 	// Suffix specifies the suffix that comes after a completion of inserted text.
 	// Defaults to null.
 	Suffix *string `json:"suffix,omitempty"`

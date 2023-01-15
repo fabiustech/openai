@@ -13,7 +13,7 @@ type EditsRequest struct {
 	Model models.Edit `json:"model"`
 	// Input is the input text to use as a starting point for the edit.
 	// Defaults to "".
-	Input *string `json:"input,omitempty"`
+	Input string `json:"input,omitempty"`
 	// Instruction is the instruction that tells the model how to edit the prompt.
 	Instruction string `json:"instruction,omitempty"`
 	// N specifies how many edits to generate for the input and instruction.
