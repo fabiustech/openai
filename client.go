@@ -17,7 +17,7 @@ import (
 const (
 	scheme   = "https"
 	host     = "api.openai.com"
-	basePath = "vi"
+	basePath = "v1"
 )
 
 func reqURL(route string) string {
