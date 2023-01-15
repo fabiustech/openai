@@ -21,12 +21,10 @@ type Embedding struct {
 }
 
 // EmbeddingResponse is the response from a Create embeddings request.
-// Todo: Wrap
 type EmbeddingResponse struct {
-	Object objects.Object   `json:"object"`
-	Data   []Embedding      `json:"data"`
-	Model  models.Embedding `json:"model"`
-	Usage  Usage            `json:"usage"`
+	*List[*Embedding]
+	Model models.Embedding
+	Usage *Usage
 }
 
 // EmbeddingRequest is the input to a Create embeddings request.

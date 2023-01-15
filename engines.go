@@ -15,23 +15,18 @@ type Engine struct {
 	Ready  bool   `json:"ready"`
 }
 
-// EnginesList is a list of engines.
-type EnginesList struct {
-	Engines []*Engine `json:"data"`
-}
-
 // ListEngines Lists the currently available engines, and provides basic
 // information about each option such as the owner and availability.
 //
 // Deprecated: Please use their replacement, Models, instead.
 // https://beta.openai.com/docs/api-reference/models
-func (c *Client) ListEngines(ctx context.Context) (*EnginesList, error) {
+func (c *Client) ListEngines(ctx context.Context) (*List[*Engine], error) {
 	var b, err = c.get(ctx, routes.Engines)
 	if err != nil {
 		return nil, err
 	}
 
-	var el *EnginesList
+	var el *List[*Engine]
 	if err = json.Unmarshal(b, el); err != nil {
 		return nil, err
 	}

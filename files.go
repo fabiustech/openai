@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/fabiustech/openai/objects"
 	"github.com/fabiustech/openai/routes"
-	"net/url"
 	"path"
 )
 
@@ -25,26 +24,6 @@ type File struct {
 	Object    objects.Object `json:"object"`
 	Owner     string         `json:"owner"`
 	Purpose   string         `json:"purpose"`
-}
-
-// FilesList is a list of files that belong to the user or organization.
-// TODO: wrap.
-type FilesList struct {
-	Files []File `json:"data"`
-}
-
-// isUrl is a helper function that determines whether the given FilePath
-// is a remote URL or a local file path.
-func isURL(path string) bool {
-	if _, err := url.ParseRequestURI(path); err != nil {
-		return false
-	}
-
-	if u, err := url.Parse(path); err != nil || u.Scheme == "" || u.Host == "" {
-		return false
-	}
-
-	return true
 }
 
 // CreateFile uploads a jsonl file to GPT3
@@ -70,13 +49,13 @@ func (c *Client) DeleteFile(ctx context.Context, id string) error {
 
 // ListFiles Lists the currently available files,
 // and provides basic information about each file such as the file name and purpose.
-func (c *Client) ListFiles(ctx context.Context) (*FilesList, error) {
+func (c *Client) ListFiles(ctx context.Context) (*List[*File], error) {
 	var b, err = c.get(ctx, routes.Files)
 	if err != nil {
 		return nil, err
 	}
 
-	var fl *FilesList
+	var fl *List[*File]
 	if err = json.Unmarshal(b, fl); err != nil {
 		return nil, err
 	}

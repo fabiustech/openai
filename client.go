@@ -154,6 +154,20 @@ func readFile(path string) (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
+// isUrl is a helper function that determines whether the given FilePath
+// is a remote URL or a local file path.
+func isURL(path string) bool {
+	if _, err := url.ParseRequestURI(path); err != nil {
+		return false
+	}
+
+	if u, err := url.Parse(path); err != nil || u.Scheme == "" || u.Host == "" {
+		return false
+	}
+
+	return true
+}
+
 func (c *Client) get(ctx context.Context, path string) ([]byte, error) {
 	var req, err = http.NewRequestWithContext(ctx, "POST", reqURL(path), nil)
 	if err != nil {
