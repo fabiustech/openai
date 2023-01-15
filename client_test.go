@@ -278,7 +278,7 @@ func handleImageEndpoint(w http.ResponseWriter, r *http.Request) {
 		Created: uint64(time.Now().Unix()),
 	}
 	for i := 0; i < imageReq.N; i++ {
-		imageData := openai.ImageResponseDataInner{}
+		imageData := openai.ImageData{}
 		switch imageReq.ResponseFormat {
 		case openai.CreateImageResponseFormatURL, "":
 			imageData.URL = "https://example.com/image.png"

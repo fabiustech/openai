@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/fabiustech/openai/models"
+	"github.com/fabiustech/openai/objects"
 	"github.com/fabiustech/openai/routes"
 )
 
@@ -108,7 +109,7 @@ type LogprobResult struct {
 // CompletionResponse represents a response structure for completion API.
 type CompletionResponse struct {
 	ID      string              `json:"id"`
-	Object  string              `json:"object"`
+	Object  objects.Object      `json:"object"`
 	Created uint64              `json:"created"`
 	Model   models.Completion   `json:"model"`
 	Choices []*CompletionChoice `json:"choices"`

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/fabiustech/openai/routes"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -19,15 +20,6 @@ const (
 	host     = "api.openai.com"
 	basePath = "v1"
 )
-
-func reqURL(route string) string {
-	var u = &url.URL{
-		Scheme: scheme,
-		Host:   host,
-		Path:   path.Join(basePath, route),
-	}
-	return u.String()
-}
 
 // Client is OpenAI GPT-3 API client.
 type Client struct {
@@ -122,7 +114,7 @@ func (c *Client) postFile(ctx context.Context, fr *FileRequest) ([]byte, error) 
 	w.Close()
 
 	var req *http.Request
-	req, err = http.NewRequestWithContext(ctx, "POST", reqURL(routeFiles), &b)
+	req, err = http.NewRequestWithContext(ctx, "POST", reqURL(routes.Files), &b)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +194,28 @@ func (c *Client) delete(ctx context.Context, path string) error {
 	return interpretResponse(resp)
 }
 
-// TODO: implement.
+func reqURL(route string) string {
+	var u = &url.URL{
+		Scheme: scheme,
+		Host:   host,
+		Path:   path.Join(basePath, route),
+	}
+	return u.String()
+}
+
 func interpretResponse(resp *http.Response) error {
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusBadRequest {
+		var b, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("error, status code: %d", resp.StatusCode)
+		}
+		var er *ErrorResponse
+		if err = json.Unmarshal(b, er); err != nil || er.Error == nil {
+			return fmt.Errorf("error, status code: %d, msg: %s", resp.StatusCode, string(b))
+		}
+
+		return er.Error
+	}
+
 	return nil
 }

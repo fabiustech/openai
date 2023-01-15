@@ -3,12 +3,14 @@ package openai
 import (
 	"context"
 	"encoding/json"
+	"github.com/fabiustech/openai/models"
+	"github.com/fabiustech/openai/objects"
 	"github.com/fabiustech/openai/routes"
 )
 
 // EditsRequest represents a request structure for Edits API.
 type EditsRequest struct {
-	Model string `json:"model"`
+	Model models.Edit `json:"model"`
 	// Input is the input text to use as a starting point for the edit.
 	// Defaults to "".
 	Input *string `json:"input,omitempty"`
@@ -38,7 +40,7 @@ type EditsChoice struct {
 
 // EditsResponse represents a response structure for Edits API.
 type EditsResponse struct {
-	Object  string         `json:"object"` // "edit"
+	Object  objects.Object `json:"object"` // "edit"
 	Created uint64         `json:"created"`
 	Usage   *Usage         `json:"usage"`
 	Choices []*EditsChoice `json:"choices"`

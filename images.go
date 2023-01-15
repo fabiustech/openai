@@ -34,14 +34,15 @@ type ImageRequestFields struct {
 
 // ImageResponse represents a response structure for image API.
 type ImageResponse struct {
-	Created uint64                    `json:"created,omitempty"`
-	Data    []*ImageResponseDataInner `json:"data,omitempty"`
+	Created uint64       `json:"created,omitempty"`
+	Data    []*ImageData `json:"data,omitempty"`
 }
 
-// ImageResponseDataInner represents a response data structure for image API.
-type ImageResponseDataInner struct {
-	URL     string `json:"url,omitempty"`
-	B64JSON string `json:"b64_json,omitempty"`
+// ImageData represents a response data structure for image API.
+// Only one field will be non-nil.
+type ImageData struct {
+	URL     *string `json:"url,omitempty"`
+	B64JSON *string `json:"b64_json,omitempty"`
 }
 
 // CreateImage ...

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/fabiustech/openai/models"
+	"github.com/fabiustech/openai/objects"
+	"github.com/fabiustech/openai/routes"
 )
 
 // Embedding is a special format of data representation that can be easily utilized by machine
@@ -13,14 +15,15 @@ import (
 // between two inputs in the original format. For example, if two texts are similar,
 // then their vector representations should also be similar.
 type Embedding struct {
-	Object    string    `json:"object"`
-	Embedding []float64 `json:"embedding"`
-	Index     int       `json:"index"`
+	Object    objects.Object `json:"object"`
+	Embedding []float64      `json:"embedding"`
+	Index     int            `json:"index"`
 }
 
 // EmbeddingResponse is the response from a Create embeddings request.
+// Todo: Wrap
 type EmbeddingResponse struct {
-	Object string           `json:"object"`
+	Object objects.Object   `json:"object"`
 	Data   []Embedding      `json:"data"`
 	Model  models.Embedding `json:"model"`
 	Usage  Usage            `json:"usage"`
@@ -45,7 +48,7 @@ type EmbeddingRequest struct {
 // CreateEmbeddings returns an EmbeddingResponse which will contain an Embedding for every item in |request.Input|.
 // https://beta.openai.com/docs/api-reference/embeddings/create
 func (c *Client) CreateEmbeddings(ctx context.Context, request *EmbeddingRequest) (*EmbeddingResponse, error) {
-	var b, err = c.post(ctx, embeddingsRoute, request)
+	var b, err = c.post(ctx, routes.Embeddings, request)
 	if err != nil {
 		return nil, err
 	}

@@ -4,29 +4,6 @@ package models
 // to generate Embedding vectors.
 type Embedding int
 
-// String implements the fmt.Stringer interface.
-func (e Embedding) String() string {
-	return enumToString[e]
-}
-
-// MarshalText implements the encoding.TextMarshaler interface.
-func (e Embedding) MarshalText() ([]byte, error) {
-	return []byte(e.String()), nil
-}
-
-// UnmarshalText implements the encoding.TextUnmarshaler interface.
-// On unrecognized value, it sets |e| to Unknown.
-func (e *Embedding) UnmarshalText(b []byte) error {
-	if val, ok := stringToEnum[(string(b))]; ok {
-		*e = val
-		return nil
-	}
-
-	*e = Unknown
-
-	return nil
-}
-
 const (
 	// Unknown represents an invalid Embedding model.
 	Unknown Embedding = iota
@@ -76,6 +53,29 @@ const (
 	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	BabbageCodeSearchText
 )
+
+// String implements the fmt.Stringer interface.
+func (e Embedding) String() string {
+	return enumToString[e]
+}
+
+// MarshalText implements the encoding.TextMarshaler interface.
+func (e Embedding) MarshalText() ([]byte, error) {
+	return []byte(e.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface.
+// On unrecognized value, it sets |e| to Unknown.
+func (e *Embedding) UnmarshalText(b []byte) error {
+	if val, ok := stringToEnum[(string(b))]; ok {
+		*e = val
+		return nil
+	}
+
+	*e = Unknown
+
+	return nil
+}
 
 var enumToString = map[Embedding]string{
 	AdaSimilarity:         "text-similarity-ada-001",

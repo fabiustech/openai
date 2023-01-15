@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"encoding/json"
+	"github.com/fabiustech/openai/objects"
 	"github.com/fabiustech/openai/routes"
 	"net/url"
 	"path"
@@ -17,16 +18,17 @@ type FileRequest struct {
 
 // File struct represents an OpenAPI file.
 type File struct {
-	Bytes     int    `json:"bytes"`
-	CreatedAt int    `json:"created_at"`
-	ID        string `json:"id"`
-	FileName  string `json:"filename"`
-	Object    string `json:"object"`
-	Owner     string `json:"owner"`
-	Purpose   string `json:"purpose"`
+	Bytes     int            `json:"bytes"`
+	CreatedAt int            `json:"created_at"`
+	ID        string         `json:"id"`
+	FileName  string         `json:"filename"`
+	Object    objects.Object `json:"object"`
+	Owner     string         `json:"owner"`
+	Purpose   string         `json:"purpose"`
 }
 
 // FilesList is a list of files that belong to the user or organization.
+// TODO: wrap.
 type FilesList struct {
 	Files []File `json:"data"`
 }
