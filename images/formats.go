@@ -1,6 +1,18 @@
 package images
 
+// Format represents the enum values for the formats in which
+// generated images are returned.
 type Format int
+
+const (
+	// FormatInvalid represents and invalid Format option.
+	FormatInvalid Format = iota
+	// FormatURL specifies that the API will return a url to the generated image.
+	// URLs will expire after an hour.
+	FormatURL
+	// FormatB64JSON specifies that the API will return the image as Base64 data.
+	FormatB64JSON
+)
 
 // String implements the fmt.Stringer interface.
 func (f Format) String() string {
@@ -20,16 +32,10 @@ func (f *Format) UnmarshalText(b []byte) error {
 		return nil
 	}
 
-	*f = FormatUnkown
+	*f = FormatInvalid
 
 	return nil
 }
-
-const (
-	FormatUnkown Format = iota
-	FormatURL
-	FormatB64JSON
-)
 
 var formatToString = map[Format]string{
 	FormatURL:     "url",

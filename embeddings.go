@@ -42,8 +42,6 @@ type EmbeddingRequest struct {
 	User string `json:"user"`
 }
 
-const embeddingsRoute = "embeddings"
-
 // CreateEmbeddings returns an EmbeddingResponse which will contain an Embedding for every item in |request.Input|.
 // https://beta.openai.com/docs/api-reference/embeddings/create
 func (c *Client) CreateEmbeddings(ctx context.Context, request *EmbeddingRequest) (*EmbeddingResponse, error) {

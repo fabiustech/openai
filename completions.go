@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/fabiustech/openai/models"
+	"github.com/fabiustech/openai/routes"
 )
 
 // CompletionRequest represents a request structure for Completion API.
@@ -114,15 +115,13 @@ type CompletionResponse struct {
 	Usage   *Usage              `json:"usage"`
 }
 
-const routeCompletions = "completions"
-
 // CreateCompletion — API call to create a completion. This is the main endpoint of the API. Returns new text as well
 // as, if requested, the probabilities over each alternative token at each position.
 //
 // If using a fine-tuned model, simply provide the model's ID in the CompletionRequest object,
 // and the server will use the model's parameters to generate the completion.
 func (c *Client) CreateCompletion(ctx context.Context, cr *CompletionRequest) (*CompletionResponse, error) {
-	var b, err = c.post(ctx, routeCompletions, cr)
+	var b, err = c.post(ctx, routes.Completions, cr)
 	if err != nil {
 		return nil, err
 	}

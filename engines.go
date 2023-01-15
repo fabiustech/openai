@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"encoding/json"
+	"github.com/fabiustech/openai/routes"
 	"path"
 )
 
@@ -19,15 +20,13 @@ type EnginesList struct {
 	Engines []*Engine `json:"data"`
 }
 
-const routeEngines = "engines"
-
 // ListEngines Lists the currently available engines, and provides basic
 // information about each option such as the owner and availability.
 //
 // Deprecated: Please use their replacement, Models, instead.
 // https://beta.openai.com/docs/api-reference/models
 func (c *Client) ListEngines(ctx context.Context) (*EnginesList, error) {
-	var b, err = c.get(ctx, routeEngines)
+	var b, err = c.get(ctx, routes.Engines)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +45,7 @@ func (c *Client) ListEngines(ctx context.Context) (*EnginesList, error) {
 // Deprecated: Please use their replacement, Models, instead.
 // https://beta.openai.com/docs/api-reference/models
 func (c *Client) GetEngine(ctx context.Context, id string) (*Engine, error) {
-	var b, err = c.get(ctx, path.Join(routeEngines, id))
+	var b, err = c.get(ctx, path.Join(routes.Engines, id))
 	if err != nil {
 		return nil, err
 	}

@@ -1,13 +1,20 @@
 package images
 
+// Size represents the enum values for the image sizes that
+// you can generate. Smaller sizes are faster to generate.
 type Size int
 
-// Image sizes defined by the OpenAI API.
-// TODO: make enum.
 const (
+	// SizeInvalid represents and invalid Size option.
 	SizeInvalid Size = iota
+	// Size256x256 specifies that the API will return an image that is
+	// 256x256 pixels.
 	Size256x256
+	// Size512x512 specifies that the API will return an image that is
+	// 512x512 pixels.
 	Size512x512
+	// Size1024x1024 specifies that the API will return an image that is
+	// 1024x1024 pixels.
 	Size1024x1024
 )
 

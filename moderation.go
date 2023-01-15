@@ -1,10 +1,9 @@
 package openai
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"net/http"
+	"github.com/fabiustech/openai/routes"
 )
 
 // ModerationRequest represents a request structure for moderation API.
@@ -49,21 +48,17 @@ type ModerationResponse struct {
 	Results []Result `json:"results"`
 }
 
-// Moderations — perform a moderation api call over a string.
-// Input can be an array or slice but a string will reduce the complexity.
-func (c *Client) Moderations(ctx context.Context, request ModerationRequest) (response ModerationResponse, err error) {
-	var reqBytes []byte
-	reqBytes, err = json.Marshal(request)
+// Moderations ...
+func (c *Client) Moderations(ctx context.Context, mr *ModerationRequest) (*ModerationResponse, error) {
+	var b, err = c.post(ctx, routes.Moderations, mr)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", c.fullURL("/moderations"), bytes.NewBuffer(reqBytes))
-	if err != nil {
-		return
+	var resp *ModerationResponse
+	if err = json.Unmarshal(b, resp); err != nil {
+		return nil, err
 	}
 
-	req = req.WithContext(ctx)
-	err = c.sendRequest(req, &response)
-	return
+	return resp, nil
 }

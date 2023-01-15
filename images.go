@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/fabiustech/openai/images"
+	"github.com/fabiustech/openai/routes"
 )
 
 // CreateImageRequest represents the request structure for the image API.
@@ -43,15 +44,9 @@ type ImageResponseDataInner struct {
 	B64JSON string `json:"b64_json,omitempty"`
 }
 
-const (
-	routeGenerations = "images/generations"
-	routeEdits       = "images/edits"
-	routeVariations  = "images/variations"
-)
-
 // CreateImage ...
 func (c *Client) CreateImage(ctx context.Context, ir *CreateImageRequest) (*ImageResponse, error) {
-	var b, err = c.post(ctx, routeGenerations, ir)
+	var b, err = c.post(ctx, routes.ImageGenerations, ir)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +61,7 @@ func (c *Client) CreateImage(ctx context.Context, ir *CreateImageRequest) (*Imag
 
 // EditImage ...
 func (c *Client) EditImage(ctx context.Context, eir *EditImageRequest) (*ImageResponse, error) {
-	var b, err = c.post(ctx, routeEdits, eir)
+	var b, err = c.post(ctx, routes.ImageEdits, eir)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +76,7 @@ func (c *Client) EditImage(ctx context.Context, eir *EditImageRequest) (*ImageRe
 
 // ImageVariation ...
 func (c *Client) ImageVariation(ctx context.Context, vir *VariationImageRequest) (*ImageResponse, error) {
-	var b, err = c.post(ctx, routeVariations, vir)
+	var b, err = c.post(ctx, routes.ImageVariations, vir)
 	if err != nil {
 		return nil, err
 	}

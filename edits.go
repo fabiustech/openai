@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"encoding/json"
+	"github.com/fabiustech/openai/routes"
 )
 
 // EditsRequest represents a request structure for Edits API.
@@ -43,11 +44,9 @@ type EditsResponse struct {
 	Choices []*EditsChoice `json:"choices"`
 }
 
-const editsRoute = "edits"
-
 // Edits ...
 func (c *Client) Edits(ctx context.Context, er *EditsRequest) (*EditsResponse, error) {
-	var b, err = c.post(ctx, editsRoute, er)
+	var b, err = c.post(ctx, routes.Edits, er)
 
 	var resp *EditsResponse
 	if err = json.Unmarshal(b, resp); err != nil {

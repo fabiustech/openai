@@ -28,7 +28,21 @@ func (e *Embedding) UnmarshalText(b []byte) error {
 }
 
 const (
+	// Unknown represents an invalid Embedding model.
 	Unknown Embedding = iota
+
+	// AdaEmbeddingV2 is the second-generation embedding model. OpenAI recommends using
+	// text-embedding-ada-002 for nearly all use cases. It’s better, cheaper, and simpler to use.
+	//
+	// Supports up to 8191. Knowledge cutoff Sep 2021.
+	AdaEmbeddingV2
+
+	// The below models are first-generation models (those ending in -001) use the GPT-3
+	// tokenizer and have a max input of 2046 tokens. First-generation embeddings are generated
+	// by five different model families tuned for three different tasks: text search, text similarity
+	// and code search. The search models come in pairs: one for short queries and one for long documents.
+	// Each family includes up to four models on a spectrum of quality and speed.
+
 	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	AdaSimilarity
 	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
@@ -61,8 +75,6 @@ const (
 	BabbageCodeSearchCode
 	// Deprecated: OpenAI recommends using text-embedding-ada-002 for nearly all use cases.
 	BabbageCodeSearchText
-
-	AdaEmbeddingV2
 )
 
 var enumToString = map[Embedding]string{

@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"encoding/json"
+	"github.com/fabiustech/openai/routes"
 	"net/url"
 	"path"
 )
@@ -60,17 +61,15 @@ func (c *Client) CreateFile(ctx context.Context, fr *FileRequest) (*File, error)
 	return f, nil
 }
 
-const routeFiles = "files"
-
 // DeleteFile deletes an existing file.
 func (c *Client) DeleteFile(ctx context.Context, id string) error {
-	return c.delete(ctx, path.Join(routeFiles, id))
+	return c.delete(ctx, path.Join(routes.Files, id))
 }
 
 // ListFiles Lists the currently available files,
 // and provides basic information about each file such as the file name and purpose.
 func (c *Client) ListFiles(ctx context.Context) (*FilesList, error) {
-	var b, err = c.get(ctx, routeFiles)
+	var b, err = c.get(ctx, routes.Files)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +85,7 @@ func (c *Client) ListFiles(ctx context.Context) (*FilesList, error) {
 // GetFile Retrieves a file instance, providing basic information about the file
 // such as the file name and purpose.
 func (c *Client) GetFile(ctx context.Context, id string) (*File, error) {
-	var b, err = c.get(ctx, path.Join(routeFiles, id))
+	var b, err = c.get(ctx, path.Join(routes.Files, id))
 	if err != nil {
 		return nil, err
 	}
