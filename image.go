@@ -79,6 +79,7 @@ func (c *Client) EditImage(ctx context.Context, eir *EditImageRequest) (*ImageRe
 	return resp, nil
 }
 
+// ImageVariation ...
 func (c *Client) ImageVariation(ctx context.Context, vir *VariationImageRequest) (*ImageResponse, error) {
 	var b, err = c.post(ctx, routeVariations, vir)
 	if err != nil {
