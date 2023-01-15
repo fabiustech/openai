@@ -269,7 +269,7 @@ func handleImageEndpoint(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-	var imageReq openai.ImageRequest
+	var imageReq openai.CreateImageRequest
 	if imageReq, err = getImageBody(r); err != nil {
 		http.Error(w, "could not read request", http.StatusInternalServerError)
 		return
@@ -311,16 +311,16 @@ func getCompletionBody(r *http.Request) (openai.CompletionRequest, error) {
 }
 
 // getImageBody Returns the body of the request to create a image.
-func getImageBody(r *http.Request) (openai.ImageRequest, error) {
-	image := openai.ImageRequest{}
+func getImageBody(r *http.Request) (openai.CreateImageRequest, error) {
+	image := openai.CreateImageRequest{}
 	// read the request body
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return openai.ImageRequest{}, err
+		return openai.CreateImageRequest{}, err
 	}
 	err = json.Unmarshal(reqBody, &image)
 	if err != nil {
-		return openai.ImageRequest{}, err
+		return openai.CreateImageRequest{}, err
 	}
 	return image, nil
 }
@@ -345,7 +345,7 @@ func TestImages(t *testing.T) {
 	ctx := context.Background()
 	client.BaseURL = ts.URL + "/v1"
 
-	req := openai.ImageRequest{}
+	req := openai.CreateImageRequest{}
 	req.Prompt = "Lorem ipsum"
 	_, err = client.CreateImage(ctx, req)
 	if err != nil {

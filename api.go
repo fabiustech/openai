@@ -90,7 +90,7 @@ func (c *Client) post(ctx context.Context, path string, payload any) ([]byte, er
 // TODO: improve this.
 func (c *Client) postFile(ctx context.Context, fr *FileRequest) ([]byte, error) {
 	var b bytes.Buffer
-	w := multipart.NewWriter(&b)
+	var w = multipart.NewWriter(&b)
 
 	var pw, err = w.CreateFormField("purpose")
 	if err != nil {
@@ -108,31 +108,14 @@ func (c *Client) postFile(ctx context.Context, fr *FileRequest) ([]byte, error) 
 		return nil, err
 	}
 
-	var fileData io.ReadCloser
-	if isURL(fr.FilePath) {
-		var remoteFile *http.Response
-		remoteFile, err = http.Get(fr.FilePath)
-		if err != nil {
-			return nil, err
-		}
-
-		defer remoteFile.Body.Close()
-
-		// Check server response
-		if remoteFile.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("error, status code: %d, message: failed to fetch file", remoteFile.StatusCode)
-		}
-
-		fileData = remoteFile.Body
-	} else {
-		fileData, err = os.Open(fr.FilePath)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	_, err = io.Copy(fw, fileData)
+	var file io.ReadCloser
+	file, err = readFile(fr.FilePath)
 	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	if _, err = io.Copy(fw, file); err != nil {
 		return nil, err
 	}
 
@@ -158,6 +141,25 @@ func (c *Client) postFile(ctx context.Context, fr *FileRequest) ([]byte, error) 
 	}
 
 	return io.ReadAll(resp.Body)
+}
+
+func readFile(path string) (io.ReadCloser, error) {
+	if !isURL(path) {
+		return os.Open(path)
+	}
+
+	var resp, err = http.Get(path)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check server response.
+	if resp.StatusCode != http.StatusOK {
+		_ = resp.Body.Close()
+		return nil, fmt.Errorf("error, status code: %d, message: failed to fetch file", resp.StatusCode)
+	}
+
+	return resp.Body, nil
 }
 
 func (c *Client) get(ctx context.Context, path string) ([]byte, error) {

@@ -3,34 +3,38 @@ package openai
 import (
 	"context"
 	"encoding/json"
+	"github.com/fabiustech/openai/images"
 )
 
-// Image sizes defined by the OpenAI API.
-// TODO: make enum.
-const (
-	CreateImageSize256x256   = "256x256"
-	CreateImageSize512x512   = "512x512"
-	CreateImageSize1024x1024 = "1024x1024"
-)
+// CreateImageRequest represents the request structure for the image API.
+type CreateImageRequest struct {
+	Prompt string `json:"prompt"`
+	*ImageRequestFields
+}
 
-const (
-	CreateImageResponseFormatURL     = "url"
-	CreateImageResponseFormatB64JSON = "b64_json"
-)
+type EditImageRequest struct {
+	Image  string  `json:"image"`
+	Mask   *string `json:"mask,omitempty"`
+	Prompt string  `json:"prompt"`
+	*ImageRequestFields
+}
 
-// ImageRequest represents the request structure for the image API.
-type ImageRequest struct {
-	Prompt         string `json:"prompt,omitempty"`
-	N              int    `json:"n,omitempty"`
-	Size           string `json:"size,omitempty"`
-	ResponseFormat string `json:"response_format,omitempty"`
-	User           string `json:"user,omitempty"`
+type VariationImageRequest struct {
+	Image string `json:"image"`
+	*ImageRequestFields
+}
+
+type ImageRequestFields struct {
+	N              *int           `json:"n,omitempty"`
+	Size           *images.Size   `json:"size,omitempty"`
+	ResponseFormat *images.Format `json:"response_format,omitempty"`
+	User           *string        `json:"user,omitempty"`
 }
 
 // ImageResponse represents a response structure for image API.
 type ImageResponse struct {
-	Created uint64                   `json:"created,omitempty"`
-	Data    []ImageResponseDataInner `json:"data,omitempty"`
+	Created uint64                    `json:"created,omitempty"`
+	Data    []*ImageResponseDataInner `json:"data,omitempty"`
 }
 
 // ImageResponseDataInner represents a response data structure for image API.
@@ -45,8 +49,8 @@ const (
 	routeVariations  = "images/variations"
 )
 
-// CreateImage - API call to create an image. This is the main endpoint of the DALL-E API.
-func (c *Client) CreateImage(ctx context.Context, ir *ImageRequest) (*ImageResponse, error) {
+// CreateImage ...
+func (c *Client) CreateImage(ctx context.Context, ir *CreateImageRequest) (*ImageResponse, error) {
 	var b, err = c.post(ctx, routeGenerations, ir)
 	if err != nil {
 		return nil, err
@@ -60,5 +64,31 @@ func (c *Client) CreateImage(ctx context.Context, ir *ImageRequest) (*ImageRespo
 	return resp, nil
 }
 
-// TODO: ImageEdit
-// TODO: ImageVariation
+// EditImage ...
+func (c *Client) EditImage(ctx context.Context, eir *EditImageRequest) (*ImageResponse, error) {
+	var b, err = c.post(ctx, routeEdits, eir)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp *ImageResponse
+	if err = json.Unmarshal(b, resp); err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (c *Client) ImageVariation(ctx context.Context, vir *VariationImageRequest) (*ImageResponse, error) {
+	var b, err = c.post(ctx, routeVariations, vir)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp *ImageResponse
+	if err = json.Unmarshal(b, resp); err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
