@@ -192,20 +192,24 @@ func (c *Client) get(ctx context.Context, path string) ([]byte, error) {
 	return io.ReadAll(resp.Body)
 }
 
-func (c *Client) delete(ctx context.Context, path string) error {
+func (c *Client) delete(ctx context.Context, path string) ([]byte, error) {
 	var req, err = http.NewRequestWithContext(ctx, "DELETE", reqURL(path), nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var resp *http.Response
 	resp, err = http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
-	return interpretResponse(resp)
+	if err = interpretResponse(resp); err != nil {
+		return nil, err
+	}
+
+	return io.ReadAll(resp.Body)
 }
 
 func reqURL(route string) string {

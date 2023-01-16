@@ -44,7 +44,9 @@ func (c *Client) CreateFile(ctx context.Context, fr *FileRequest) (*File, error)
 
 // DeleteFile deletes an existing file.
 func (c *Client) DeleteFile(ctx context.Context, id string) error {
-	return c.delete(ctx, path.Join(routes.Files, id))
+	var _, err = c.delete(ctx, path.Join(routes.Files, id))
+
+	return err
 }
 
 // ListFiles Lists the currently available files,

@@ -6,6 +6,7 @@ import (
 	"github.com/fabiustech/openai/models"
 	"github.com/fabiustech/openai/objects"
 	"github.com/fabiustech/openai/routes"
+	"path"
 )
 
 // FineTuneRequest ...
@@ -89,18 +90,20 @@ type FineTuneRequest struct {
 	Suffix string `json:"suffix,omitempty"`
 }
 
+type Event struct {
+	Object    objects.Object `json:"object"`
+	CreatedAt uint64         `json:"created_at"`
+	Level     string         `json:"level"`
+	Message   string         `json:"message"`
+}
+
 type FineTuneResponse struct {
-	ID        string            `json:"id"`
-	Object    objects.Object    `json:"object"`
-	Model     models.Completion `json:"model"`
-	CreatedAt uint64            `json:"created_at"`
-	Events    []struct {
-		Object    objects.Object `json:"object"`
-		CreatedAt uint64         `json:"created_at"`
-		Level     string         `json:"level"`
-		Message   string         `json:"message"`
-	} `json:"events"`
-	FineTunedModel *string `json:"fine_tuned_model"`
+	ID             string            `json:"id"`
+	Object         objects.Object    `json:"object"`
+	Model          models.Completion `json:"model"`
+	CreatedAt      uint64            `json:"created_at"`
+	Events         []*Event          `json:"events,omitempty"`
+	FineTunedModel *string           `json:"fine_tuned_model"`
 	Hyperparams    struct {
 		BatchSize              int     `json:"batch_size"`
 		LearningRateMultiplier float64 `json:"learning_rate_multiplier"`
@@ -122,6 +125,12 @@ type FineTuneResponse struct {
 	UpdatedAt uint64 `json:"updated_at"`
 }
 
+type FineTuneDeletionResponse struct {
+	ID      string         `json:"id"`
+	Object  objects.Object `json:"object"`
+	Deleted bool           `json:"deleted"`
+}
+
 // CreateFineTune ...
 func (c *Client) CreateFineTune(ctx context.Context, ftr *FineTuneRequest) (*FineTuneResponse, error) {
 	var b, err = c.post(ctx, routes.FineTunes, ftr)
@@ -130,6 +139,77 @@ func (c *Client) CreateFineTune(ctx context.Context, ftr *FineTuneRequest) (*Fin
 	}
 
 	var f *FineTuneResponse
+	if err = json.Unmarshal(b, f); err != nil {
+		return nil, err
+	}
+
+	return f, nil
+}
+
+func (c *Client) ListFineTunes(ctx context.Context) (*List[*FineTuneResponse], error) {
+	var b, err = c.get(ctx, routes.FineTunes)
+	if err != nil {
+		return nil, err
+	}
+
+	var l *List[*FineTuneResponse]
+	if err = json.Unmarshal(b, l); err != nil {
+		return nil, err
+	}
+
+	return l, nil
+}
+
+func (c *Client) RetrieveFineTune(ctx context.Context, id string) (*FineTuneResponse, error) {
+	var b, err = c.get(ctx, path.Join(routes.FineTunes, id))
+	if err != nil {
+		return nil, err
+	}
+
+	var f *FineTuneResponse
+	if err = json.Unmarshal(b, f); err != nil {
+		return nil, err
+	}
+
+	return f, nil
+}
+
+func (c *Client) CancelFineTune(ctx context.Context, id string) (*FineTuneResponse, error) {
+	var b, err = c.post(ctx, path.Join(routes.FineTunes, id, "cancel"), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var f *FineTuneResponse
+	if err = json.Unmarshal(b, f); err != nil {
+		return nil, err
+	}
+
+	return f, nil
+}
+
+// TODO: Support streaming (maybe different method).
+func (c *Client) ListFineTuneEvents(ctx context.Context, id string) (*List[*Event], error) {
+	var b, err = c.get(ctx, path.Join(routes.FineTunes, id, "events"))
+	if err != nil {
+		return nil, err
+	}
+
+	var l *List[*Event]
+	if err = json.Unmarshal(b, l); err != nil {
+		return nil, err
+	}
+
+	return l, nil
+}
+
+func (c *Client) DeleteFineTune(ctx context.Context, id string) (*FineTuneDeletionResponse, error) {
+	var b, err = c.delete(ctx, path.Join(routes.FineTunes, id))
+	if err != nil {
+		return nil, err
+	}
+
+	var f *FineTuneDeletionResponse
 	if err = json.Unmarshal(b, f); err != nil {
 		return nil, err
 	}
