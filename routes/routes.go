@@ -21,7 +21,10 @@ const (
 	// https://beta.openai.com/docs/api-reference/files
 	Files = "files"
 
-	//
+	// FineTunes is the route for the fine-tunes endpoint.
+	// https://beta.openai.com/docs/api-reference/fine-tunes
+	FineTunes = "fines-tunes"
+
 	imagesBase = "images/"
 
 	// ImageGenerations is the route for the create images endpoint.

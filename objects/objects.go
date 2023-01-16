@@ -24,6 +24,7 @@ const (
 	File
 	// FineTune is a fine-tuned model.
 	FineTune
+	FineTimeEvent
 	// Engine represents an engine.
 	// Deprecated: use Model instead.
 	Engine
@@ -61,6 +62,7 @@ var objectToString = map[Object]string{
 	Embedding:      "embedding",
 	File:           "file",
 	FineTune:       "fine-tune",
+	FineTimeEvent:  "fine-tune-event",
 	Engine:         "engine",
 }
 
@@ -73,5 +75,6 @@ var stringToObject = map[string]Object{
 	"embedding":       Embedding,
 	"file":            File,
 	"fine-tune":       FineTune,
+	"fine-tune-event": FineTimeEvent,
 	"engine":          Engine,
 }
