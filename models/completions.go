@@ -49,21 +49,6 @@ const (
 	// English instructions.
 	CurieInstructBeta
 
-	// Davinci most capable of the older versions of the GPT-3 models
-	// and is intended to be used with the fine-tuning endpoints.
-	Davinci
-	// Curie is very capable, but faster and lower cost than Davinci. It is
-	// an older version of the GPT-3 models and is intended to be used with
-	// the fine-tuning endpoints.
-	Curie
-	// Babbage is capable of straightforward tasks, very fast, and lower cost.
-	// It is an older version of the GPT-3 models and is intended to be used
-	// with the fine-tuning endpoints.
-	Babbage
-	// Ada is capable of very simple tasks, usually the fastest model in the
-	//  GPT-3 series, and lowest cost. It is an older version of the GPT-3
-	// models and is intended to be used with the fine-tuning endpoints.
-	Ada
 	// CodeDavinci002 is the most capable Codex model. Particularly good at
 	// translating natural language to code. In addition to completing code,
 	// also supports inserting completions within code.
@@ -124,10 +109,6 @@ var completionToString = map[Completion]string{
 	TextDavinci001:       "text-davinci-001",
 	DavinciInstructBeta:  "davinci-instruct-beta",
 	CurieInstructBeta:    "curie-instruct-beta",
-	Davinci:              "davinci",
-	Curie:                "curie",
-	Ada:                  "ada",
-	Babbage:              "babbage",
 	CodeDavinci002:       "code-davinci-002",
 	CodeCushman001:       "code-cushman-001",
 	CodeDavinci001:       "code-davinci-001",
@@ -144,10 +125,6 @@ var stringToCompletion = map[string]Completion{
 	"text-davinci-001":        TextDavinci001,
 	"davinci-instruct-beta":   DavinciInstructBeta,
 	"curie-instruct-beta":     CurieInstructBeta,
-	"davinci":                 Davinci,
-	"curie":                   Curie,
-	"ada":                     Ada,
-	"babbage":                 Babbage,
 	"code-davinci-002":        CodeDavinci002,
 	"code-cushman-001":        CodeCushman001,
 	"code-davinci-001":        CodeDavinci001,

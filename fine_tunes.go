@@ -38,7 +38,7 @@ type FineTuneRequest struct {
 	// "davinci", or a fine-tuned model created after 2022-04-21. To learn more about these models, see the Models
 	// documentation.
 	// Defaults to "curie".
-	Model *models.Completion `json:"model,omitempty"`
+	Model *models.FineTune `json:"model,omitempty"`
 	// NEpochs specifies the number of epochs to train the model for. An epoch refers to one full cycle through
 	// the training dataset.
 	// Defaults to 4.
@@ -98,12 +98,12 @@ type Event struct {
 }
 
 type FineTuneResponse struct {
-	ID             string            `json:"id"`
-	Object         objects.Object    `json:"object"`
-	Model          models.Completion `json:"model"`
-	CreatedAt      uint64            `json:"created_at"`
-	Events         []*Event          `json:"events,omitempty"`
-	FineTunedModel *string           `json:"fine_tuned_model"`
+	ID             string          `json:"id"`
+	Object         objects.Object  `json:"object"`
+	Model          models.FineTune `json:"model"`
+	CreatedAt      uint64          `json:"created_at"`
+	Events         []*Event        `json:"events,omitempty"`
+	FineTunedModel *string         `json:"fine_tuned_model"`
 	Hyperparams    struct {
 		BatchSize              int     `json:"batch_size"`
 		LearningRateMultiplier float64 `json:"learning_rate_multiplier"`
