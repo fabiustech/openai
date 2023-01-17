@@ -5,11 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/fabiustech/openai"
-	"github.com/fabiustech/openai/images"
-	"github.com/fabiustech/openai/models"
-	"github.com/fabiustech/openai/objects"
-	"github.com/fabiustech/openai/params"
 	"io"
 	"log"
 	"net/http"
@@ -19,6 +14,12 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/fabiustech/openai"
+	"github.com/fabiustech/openai/images"
+	"github.com/fabiustech/openai/models"
+	"github.com/fabiustech/openai/objects"
+	"github.com/fabiustech/openai/params"
 )
 
 const (
@@ -49,8 +50,8 @@ func TestAPI(t *testing.T) {
 		t.Fatalf("ListFiles error: %v", err)
 	}
 
-	if len(fileRes.Files) > 0 {
-		_, err = c.GetFile(ctx, fileRes.Files[0].ID)
+	if len(fileRes.Data) > 0 {
+		_, err = c.GetFile(ctx, fileRes.Data[0].ID)
 		if err != nil {
 			t.Fatalf("GetFile error: %v", err)
 		}
@@ -83,7 +84,7 @@ func TestCompletions(t *testing.T) {
 
 	req := &openai.CompletionRequest{
 		MaxTokens: params.Optional(5),
-		Model:     models.Ada,
+		Model:     models.TextDavinci003,
 	}
 	req.Prompt = "Lorem ipsum"
 	_, err = client.CreateCompletion(ctx, req)
@@ -282,12 +283,12 @@ func handleImageEndpoint(w http.ResponseWriter, r *http.Request) {
 	res := &openai.ImageResponse{
 		Created: uint64(time.Now().Unix()),
 	}
-	for i := 0; i < *imageReq.N; i++ {
+	for i := 0; i < imageReq.N; i++ {
 		var imageData = &openai.ImageData{}
 		switch imageReq.ResponseFormat {
-		case params.Optional(images.FormatURL), nil:
+		case images.FormatURL:
 			imageData.URL = params.Optional("https://example.com/image.png")
-		case params.Optional(images.FormatB64JSON):
+		case images.FormatB64JSON:
 			// This decodes to "{}" in base64.
 			imageData.B64JSON = params.Optional("e30K")
 		default:

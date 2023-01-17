@@ -3,10 +3,11 @@ package openai
 import (
 	"context"
 	"encoding/json"
+	"path"
+
 	"github.com/fabiustech/openai/models"
 	"github.com/fabiustech/openai/objects"
 	"github.com/fabiustech/openai/routes"
-	"path"
 )
 
 // FineTuneRequest ...

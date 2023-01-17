@@ -3,8 +3,9 @@ package openai
 import (
 	"context"
 	"encoding/json"
-	"github.com/fabiustech/openai/routes"
 	"path"
+
+	"github.com/fabiustech/openai/routes"
 )
 
 // Engine struct represents engine from OpenAPI API.

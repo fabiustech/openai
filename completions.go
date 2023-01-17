@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/fabiustech/openai/models"
 	"github.com/fabiustech/openai/objects"
 	"github.com/fabiustech/openai/routes"

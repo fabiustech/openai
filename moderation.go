@@ -3,13 +3,19 @@ package openai
 import (
 	"context"
 	"encoding/json"
+
+	"github.com/fabiustech/openai/models"
+
 	"github.com/fabiustech/openai/routes"
 )
 
 // ModerationRequest represents a request structure for moderation API.
 type ModerationRequest struct {
-	Input string  `json:"input,omitempty"`
-	Model *string `json:"model,omitempty"`
+	// Input is the input text to classify.
+	Input string `json:"input,omitempty"`
+	// Model specifies the model to use for moderation.
+	// Defaults to models.TextModerationLatest.
+	Model models.Moderation `json:"model,omitempty"`
 }
 
 // Result represents one of possible moderation results.
