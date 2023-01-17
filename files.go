@@ -10,24 +10,28 @@ import (
 
 // FileRequest ...
 type FileRequest struct {
-	FileName string `json:"file"`
+	// File is the JSON Lines file to be uploaded. If the purpose is set to "fine-tune", each line is a JSON record
+	// with "prompt" and "completion" fields representing your training examples:
+	// https://beta.openai.com/docs/guides/fine-tuning/prepare-training-data.
+	File     string `json:"file"`
 	FilePath string `json:"-"`
-	Purpose  string `json:"purpose"`
+	// The intended purpose of the uploaded documents. Use "fine-tune" for Fine-tuning.
+	// This allows OpenAI to validate the format of the uploaded file.
+	Purpose string `json:"purpose"`
 }
 
 // File struct represents an OpenAPI file.
 type File struct {
+	ID        string         `json:"id"`
+	Object    objects.Object `json:"object"`
 	Bytes     int            `json:"bytes"`
 	CreatedAt int            `json:"created_at"`
-	ID        string         `json:"id"`
-	FileName  string         `json:"filename"`
-	Object    objects.Object `json:"object"`
-	Owner     string         `json:"owner"`
+	Filename  string         `json:"filename"`
 	Purpose   string         `json:"purpose"`
 }
 
-// CreateFile uploads a jsonl file to GPT3
-// FilePath can be either a local file path or a URL.
+// TODO: FileRequest should take a file.File.
+// CreateFile ...
 func (c *Client) CreateFile(ctx context.Context, fr *FileRequest) (*File, error) {
 	var b, err = c.postFile(ctx, fr)
 	if err != nil {
@@ -42,15 +46,14 @@ func (c *Client) CreateFile(ctx context.Context, fr *FileRequest) (*File, error)
 	return f, nil
 }
 
-// DeleteFile deletes an existing file.
+// DeleteFile ...
 func (c *Client) DeleteFile(ctx context.Context, id string) error {
 	var _, err = c.delete(ctx, path.Join(routes.Files, id))
 
 	return err
 }
 
-// ListFiles Lists the currently available files,
-// and provides basic information about each file such as the file name and purpose.
+// ListFiles ...
 func (c *Client) ListFiles(ctx context.Context) (*List[*File], error) {
 	var b, err = c.get(ctx, routes.Files)
 	if err != nil {
@@ -65,8 +68,7 @@ func (c *Client) ListFiles(ctx context.Context) (*List[*File], error) {
 	return fl, nil
 }
 
-// GetFile Retrieves a file instance, providing basic information about the file
-// such as the file name and purpose.
+// GetFile ...
 func (c *Client) GetFile(ctx context.Context, id string) (*File, error) {
 	var b, err = c.get(ctx, path.Join(routes.Files, id))
 	if err != nil {

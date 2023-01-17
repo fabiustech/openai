@@ -10,7 +10,7 @@ type ErrorResponse struct {
 }
 
 type Error struct {
-	Code    int     `json:"code,omitempty"`
+	Code    int     `json:"code"`
 	Message string  `json:"message"`
 	Param   *string `json:"param,omitempty"`
 	Type    string  `json:"type"`

@@ -95,7 +95,7 @@ func (c *Client) postFile(ctx context.Context, fr *FileRequest) ([]byte, error) 
 	}
 
 	var fw io.Writer
-	fw, err = w.CreateFormFile("file", fr.FileName)
+	fw, err = w.CreateFormFile("file", fr.File)
 	if err != nil {
 		return nil, err
 	}
