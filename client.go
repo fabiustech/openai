@@ -136,7 +136,7 @@ func (c *Client) postFile(ctx context.Context, fr *FileRequest) ([]byte, error) 
 }
 
 func (c *Client) get(ctx context.Context, path string) ([]byte, error) {
-	var req, err = c.newRequest(ctx, "POST", c.reqURL(path), nil)
+	var req, err = c.newRequest(ctx, "GET", c.reqURL(path), nil)
 	if err != nil {
 		return nil, err
 	}
