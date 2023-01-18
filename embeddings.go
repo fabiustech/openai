@@ -31,7 +31,7 @@ type EmbeddingResponse struct {
 // EmbeddingRequest contains all relevant fields for requests to the embeddings endpoint.
 type EmbeddingRequest struct {
 	// Input represents input text to get embeddings for, encoded as a strings. To get embeddings for multiple inputs in
-	//a single request, pass a slice of length > 1. Each input string must not exceed 8192 tokens in length.
+	// a single request, pass a slice of length > 1. Each input string must not exceed 8192 tokens in length.
 	Input []string `json:"input"`
 	// Model is the ID of the model to use.
 	Model models.Embedding `json:"model"`

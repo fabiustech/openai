@@ -20,9 +20,9 @@ type EditsRequest struct {
 	// N specifies how many edits to generate for the input and instruction.
 	// Defaults to 1.
 	N int `json:"n,omitempty"`
-	// Temperature specifies what sampling temperature to use. Higher values means the model will take more risks. Try 0.9 for more creative
-	// applications, and 0 (argmax sampling) for ones with a well-defined answer. OpenAI generally recommends altering
-	// this or top_p but not both.
+	// Temperature specifies what sampling temperature to use. Higher values means the model will take more risks.
+	// Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer. OpenAI
+	// generally recommends altering this or top_p but not both.
 	// More on sampling temperature: https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277
 	// Defaults to 1.
 	Temperature *float32 `json:"temperature,omitempty"`
@@ -50,6 +50,9 @@ type EditsResponse struct {
 // CreateEdit creates a new edit for the provided input, instruction, and parameters.
 func (c *Client) CreateEdit(ctx context.Context, er *EditsRequest) (*EditsResponse, error) {
 	var b, err = c.post(ctx, routes.Edits, er)
+	if err != nil {
+		return nil, err
+	}
 
 	var resp = &EditsResponse{}
 	if err = json.Unmarshal(b, resp); err != nil {

@@ -14,22 +14,22 @@ type CompletionRequest struct {
 	// Model specifies the ID of the model to use.
 	// See more here: https://beta.openai.com/docs/models/overview
 	Model models.Completion `json:"model"`
-	// Prompt specifies the prompt(s) to generate completions for, encoded as a string, array of strings, array of tokens,
-	// or array of token arrays. Note that <|endoftext|> is the document separator that the model sees during
+	// Prompt specifies the prompt(s) to generate completions for, encoded as a string, array of strings, array of
+	// tokens, or array of token arrays. Note that <|endoftext|> is the document separator that the model sees during
 	// training, so if a prompt is not specified the model will generate as if from the beginning of a new document.
 	// Defaults to <|endoftext|>.
 	Prompt string `json:"prompt,omitempty"`
 	// Suffix specifies the suffix that comes after a completion of inserted text.
 	// Defaults to null.
 	Suffix string `json:"suffix,omitempty"`
-	// MaxTokens specifies the maximum number of tokens to generate in the completion. The token count of your prompt plus
-	// max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens (except
-	// for the newest models, which support 4096).
+	// MaxTokens specifies the maximum number of tokens to generate in the completion. The token count of your prompt
+	// plus max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens
+	// (except for the newest models, which support 4096).
 	// Defaults to 16.
 	MaxTokens int `json:"max_tokens,omitempty"`
-	// Temperature specifies what sampling temperature to use. Higher values means the model will take more risks. Try 0.9 for more creative
-	// applications, and 0 (argmax sampling) for ones with a well-defined answer. OpenAI generally recommends altering
-	// this or top_p but not both.
+	// Temperature specifies what sampling temperature to use. Higher values means the model will take more risks. Try
+	// 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer. OpenAI generally
+	//recommends altering this or top_p but not both.
 	// More on sampling temperature: https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277
 	// Defaults to 1.
 	Temperature *float32 `json:"temperature,omitempty"`

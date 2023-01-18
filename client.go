@@ -191,7 +191,7 @@ func interpretResponse(resp *http.Response) error {
 		if err != nil {
 			return fmt.Errorf("error, status code: %d", resp.StatusCode)
 		}
-		var er *errorResponse
+		var er = &errorResponse{}
 		if err = json.Unmarshal(b, er); err != nil || er.Error == nil {
 			return fmt.Errorf("error, status code: %d, msg: %s", resp.StatusCode, string(b))
 		}

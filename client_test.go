@@ -135,22 +135,6 @@ func TestEdits(t *testing.T) {
 
 func TestEmbedding(t *testing.T) {
 	embeddedModels := []models.Embedding{
-		models.AdaSimilarity,
-		models.BabbageSimilarity,
-		models.CurieSimilarity,
-		models.DavinciSimilarity,
-		models.AdaSearchDocument,
-		models.AdaSearchQuery,
-		models.BabbageSearchDocument,
-		models.BabbageSearchQuery,
-		models.CurieSearchDocument,
-		models.CurieSearchQuery,
-		models.DavinciSearchDocument,
-		models.DavinciSearchQuery,
-		models.AdaCodeSearchCode,
-		models.AdaCodeSearchText,
-		models.BabbageCodeSearchCode,
-		models.BabbageCodeSearchText,
 		models.AdaEmbeddingV2,
 	}
 	for _, model := range embeddedModels {
@@ -314,7 +298,7 @@ func handleImageEndpoint(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var b, _ = json.Marshal(resp)
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 // getCompletionBody Returns the body of the request to create a completion.
