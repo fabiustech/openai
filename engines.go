@@ -8,7 +8,7 @@ import (
 	"github.com/fabiustech/openai/routes"
 )
 
-// Engine struct represents engine from OpenAPI API.
+// Engine contains all relevant fields for requests to the engines endpoint.
 type Engine struct {
 	ID     string `json:"id"`
 	Object string `json:"object"`

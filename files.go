@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"encoding/json"
+	"os"
 	"path"
 
 	"github.com/fabiustech/openai/objects"
@@ -14,14 +15,26 @@ type FileRequest struct {
 	// File is the JSON Lines file to be uploaded. If the purpose is set to "fine-tune", each line is a JSON record
 	// with "prompt" and "completion" fields representing your training examples:
 	// https://beta.openai.com/docs/guides/fine-tuning/prepare-training-data.
-	File     string `json:"file"`
-	FilePath string `json:"-"`
-	// The intended purpose of the uploaded documents. Use "fine-tune" for Fine-tuning.
+	File *os.File
+	// Purpose is the intended purpose of the uploaded documents. Use "fine-tune" for Fine-tuning.
 	// This allows OpenAI to validate the format of the uploaded file.
-	Purpose string `json:"purpose"`
+	Purpose string
 }
 
-// File struct represents an OpenAPI file.
+// NewFineTuneFileRequest returns a |*FileRequest| with File opened from |path| and Purpose set to "fine-tuned".
+func NewFineTuneFileRequest(path string) (*FileRequest, error) {
+	var f, err = os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return &FileRequest{
+		File:    f,
+		Purpose: "fine-tune",
+	}, nil
+}
+
+// File represents an OpenAPI file.
 type File struct {
 	ID        string         `json:"id"`
 	Object    objects.Object `json:"object"`
@@ -31,9 +44,8 @@ type File struct {
 	Purpose   string         `json:"purpose"`
 }
 
-// TODO: FileRequest should take a file.File.
-// CreateFile ...
-func (c *Client) CreateFile(ctx context.Context, fr *FileRequest) (*File, error) {
+// UploadFile ...
+func (c *Client) UploadFile(ctx context.Context, fr *FileRequest) (*File, error) {
 	var b, err = c.postFile(ctx, fr)
 	if err != nil {
 		return nil, err

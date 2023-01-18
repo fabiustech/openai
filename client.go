@@ -9,9 +9,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
-	"strings"
 
 	"github.com/fabiustech/openai/routes"
 )
@@ -26,20 +24,27 @@ const (
 type Client struct {
 	token string
 	orgID *string
+
+	// scheme and host are only used for testing.
+	scheme, host string
 }
 
 // NewClient creates new OpenAI API client.
 func NewClient(token string) *Client {
 	return &Client{
-		token: token,
+		token:  token,
+		scheme: scheme,
+		host:   host,
 	}
 }
 
 // NewClientWithOrg creates new OpenAI API client for specified Organization ID.
 func NewClientWithOrg(token, org string) *Client {
 	return &Client{
-		token: token,
-		orgID: &org,
+		token:  token,
+		orgID:  &org,
+		scheme: scheme,
+		host:   host,
 	}
 }
 
@@ -50,17 +55,12 @@ func (c *Client) post(ctx context.Context, path string, payload any) ([]byte, er
 	}
 
 	var req *http.Request
-	req, err = http.NewRequestWithContext(ctx, "POST", reqURL(path), bytes.NewBuffer(b))
+	req, err = http.NewRequestWithContext(ctx, "POST", c.reqURL(path), bytes.NewBuffer(b))
 	if err != nil {
 		return nil, err
 	}
 
-	switch payload.(type) {
-	case FileRequest:
-		req.Header.Set("Content-Type", "") // TODO
-	default:
-		req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 
 	if c.orgID != nil {
 		req.Header.Set("OpenAI-Organization", *c.orgID)
@@ -80,47 +80,38 @@ func (c *Client) post(ctx context.Context, path string, payload any) ([]byte, er
 	return io.ReadAll(resp.Body)
 }
 
-// TODO: improve this.
 func (c *Client) postFile(ctx context.Context, fr *FileRequest) ([]byte, error) {
 	var b bytes.Buffer
 	var w = multipart.NewWriter(&b)
 
-	var pw, err = w.CreateFormField("purpose")
+	if err := w.WriteField("purposes", fr.Purpose); err != nil {
+		return nil, err
+	}
+
+	var fw, err = w.CreateFormFile("file", fr.File.Name())
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = io.Copy(pw, strings.NewReader(fr.Purpose))
-	if err != nil {
+	if _, err = io.Copy(fw, fr.File); err != nil {
 		return nil, err
 	}
 
-	var fw io.Writer
-	fw, err = w.CreateFormFile("file", fr.File)
-	if err != nil {
+	if err = w.Close(); err != nil {
 		return nil, err
 	}
-
-	var file io.ReadCloser
-	file, err = readFile(fr.FilePath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	if _, err = io.Copy(fw, file); err != nil {
-		return nil, err
-	}
-
-	w.Close()
 
 	var req *http.Request
-	req, err = http.NewRequestWithContext(ctx, "POST", reqURL(routes.Files), &b)
+	req, err = http.NewRequestWithContext(ctx, "POST", c.reqURL(routes.Files), &b)
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Set("Content-Type", w.FormDataContentType())
+
+	if c.orgID != nil {
+		req.Header.Set("OpenAI-Organization", *c.orgID)
+	}
 
 	var resp *http.Response
 	resp, err = http.DefaultClient.Do(req)
@@ -136,41 +127,8 @@ func (c *Client) postFile(ctx context.Context, fr *FileRequest) ([]byte, error) 
 	return io.ReadAll(resp.Body)
 }
 
-func readFile(path string) (io.ReadCloser, error) {
-	if !isURL(path) {
-		return os.Open(path)
-	}
-
-	var resp, err = http.Get(path)
-	if err != nil {
-		return nil, err
-	}
-
-	// Check server response.
-	if resp.StatusCode != http.StatusOK {
-		_ = resp.Body.Close()
-		return nil, fmt.Errorf("error, status code: %d, message: failed to fetch file", resp.StatusCode)
-	}
-
-	return resp.Body, nil
-}
-
-// isUrl is a helper function that determines whether the given FilePath
-// is a remote URL or a local file path.
-func isURL(path string) bool {
-	if _, err := url.ParseRequestURI(path); err != nil {
-		return false
-	}
-
-	if u, err := url.Parse(path); err != nil || u.Scheme == "" || u.Host == "" {
-		return false
-	}
-
-	return true
-}
-
 func (c *Client) get(ctx context.Context, path string) ([]byte, error) {
-	var req, err = http.NewRequestWithContext(ctx, "POST", reqURL(path), nil)
+	var req, err = http.NewRequestWithContext(ctx, "POST", c.reqURL(path), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +152,7 @@ func (c *Client) get(ctx context.Context, path string) ([]byte, error) {
 }
 
 func (c *Client) delete(ctx context.Context, path string) ([]byte, error) {
-	var req, err = http.NewRequestWithContext(ctx, "DELETE", reqURL(path), nil)
+	var req, err = http.NewRequestWithContext(ctx, "DELETE", c.reqURL(path), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -213,10 +171,10 @@ func (c *Client) delete(ctx context.Context, path string) ([]byte, error) {
 	return io.ReadAll(resp.Body)
 }
 
-func reqURL(route string) string {
+func (c *Client) reqURL(route string) string {
 	var u = &url.URL{
-		Scheme: scheme,
-		Host:   host,
+		Scheme: c.scheme,
+		Host:   c.host,
 		Path:   path.Join(basePath, route),
 	}
 	return u.String()
@@ -228,7 +186,7 @@ func interpretResponse(resp *http.Response) error {
 		if err != nil {
 			return fmt.Errorf("error, status code: %d", resp.StatusCode)
 		}
-		var er *ErrorResponse
+		var er *errorResponse
 		if err = json.Unmarshal(b, er); err != nil || er.Error == nil {
 			return fmt.Errorf("error, status code: %d, msg: %s", resp.StatusCode, string(b))
 		}

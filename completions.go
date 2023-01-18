@@ -9,7 +9,7 @@ import (
 	"github.com/fabiustech/openai/routes"
 )
 
-// CompletionRequest represents a request structure for Completion API.
+// CompletionRequest contains all relevant fields for requests to the completions endpoint.
 type CompletionRequest struct {
 	// Model specifies the ID of the model to use.
 	// See more here: https://beta.openai.com/docs/models/overview
@@ -21,12 +21,12 @@ type CompletionRequest struct {
 	Prompt string `json:"prompt,omitempty"`
 	// Suffix specifies the suffix that comes after a completion of inserted text.
 	// Defaults to null.
-	Suffix *string `json:"suffix,omitempty"`
+	Suffix string `json:"suffix,omitempty"`
 	// MaxTokens specifies the maximum number of tokens to generate in the completion. The token count of your prompt plus
 	// max_tokens cannot exceed the model's context length. Most models have a context length of 2048 tokens (except
 	// for the newest models, which support 4096).
 	// Defaults to 16.
-	MaxTokens *int `json:"max_tokens,omitempty"`
+	MaxTokens int `json:"max_tokens,omitempty"`
 	// Temperature specifies what sampling temperature to use. Higher values means the model will take more risks. Try 0.9 for more creative
 	// applications, and 0 (argmax sampling) for ones with a well-defined answer. OpenAI generally recommends altering
 	// this or top_p but not both.
@@ -42,7 +42,7 @@ type CompletionRequest struct {
 	// Note: Because this parameter generates many completions, it can quickly consume your token quota. Use carefully
 	// and ensure that you have reasonable settings for max_tokens and stop.
 	// Defaults to 1.
-	N *int `json:"n,omitempty"`
+	N int `json:"n,omitempty"`
 	// Steam specifies Whether to stream back partial progress. If set, tokens will be sent as data-only server-sent
 	// events as they become available, with the stream terminated by a data: [DONE] message.
 	// Defaults to false.

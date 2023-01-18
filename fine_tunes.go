@@ -10,7 +10,7 @@ import (
 	"github.com/fabiustech/openai/routes"
 )
 
-// FineTuneRequest ...
+// FineTuneRequest contains all relevant fields for requests to the fine-tunes endpoints.
 type FineTuneRequest struct {
 	// TrainingFile specifies the ID of an uploaded file that contains training data. See upload file for how to upload
 	// a file.
@@ -91,6 +91,7 @@ type FineTuneRequest struct {
 	Suffix string `json:"suffix,omitempty"`
 }
 
+// Event represents an event related to a fine-tune request.
 type Event struct {
 	Object    objects.Object `json:"object"`
 	CreatedAt uint64         `json:"created_at"`
@@ -98,6 +99,7 @@ type Event struct {
 	Message   string         `json:"message"`
 }
 
+// FineTuneResponse is the response from fine-tunes endpoints.
 type FineTuneResponse struct {
 	ID             string          `json:"id"`
 	Object         objects.Object  `json:"object"`
@@ -126,6 +128,7 @@ type FineTuneResponse struct {
 	UpdatedAt uint64 `json:"updated_at"`
 }
 
+// FineTuneDeletionResponse is the response from the fine-tunes/delete endpoint.
 type FineTuneDeletionResponse struct {
 	ID      string         `json:"id"`
 	Object  objects.Object `json:"object"`
@@ -189,7 +192,7 @@ func (c *Client) CancelFineTune(ctx context.Context, id string) (*FineTuneRespon
 	return f, nil
 }
 
-// TODO: Support streaming (maybe different method).
+// TODO: Support streaming (in a different method).
 func (c *Client) ListFineTuneEvents(ctx context.Context, id string) (*List[*Event], error) {
 	var b, err = c.get(ctx, path.Join(routes.FineTunes, id, "events"))
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 	"github.com/fabiustech/openai/routes"
 )
 
-// ModerationRequest represents a request structure for moderation API.
+// ModerationRequest contains all relevant fields for requests to the moderations endpoint.
 type ModerationRequest struct {
 	// Input is the input text to classify.
 	Input string `json:"input,omitempty"`

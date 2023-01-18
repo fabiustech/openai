@@ -9,7 +9,7 @@ import (
 	"github.com/fabiustech/openai/routes"
 )
 
-// EditsRequest represents a request structure for Edits API.
+// EditsRequest contains all relevant fields for requests to the edits endpoint.
 type EditsRequest struct {
 	Model models.Edit `json:"model"`
 	// Input is the input text to use as a starting point for the edit.
@@ -19,7 +19,7 @@ type EditsRequest struct {
 	Instruction string `json:"instruction,omitempty"`
 	// N specifies how many edits to generate for the input and instruction.
 	// Defaults to 1.
-	N *int `json:"n,omitempty"`
+	N int `json:"n,omitempty"`
 	// Temperature specifies what sampling temperature to use. Higher values means the model will take more risks. Try 0.9 for more creative
 	// applications, and 0 (argmax sampling) for ones with a well-defined answer. OpenAI generally recommends altering
 	// this or top_p but not both.
@@ -47,8 +47,8 @@ type EditsResponse struct {
 	Choices []*EditsChoice `json:"choices"`
 }
 
-// Edits ...
-func (c *Client) Edits(ctx context.Context, er *EditsRequest) (*EditsResponse, error) {
+// CreateEdit ...
+func (c *Client) CreateEdit(ctx context.Context, er *EditsRequest) (*EditsResponse, error) {
 	var b, err = c.post(ctx, routes.Edits, er)
 
 	var resp *EditsResponse

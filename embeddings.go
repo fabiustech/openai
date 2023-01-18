@@ -28,7 +28,7 @@ type EmbeddingResponse struct {
 	Usage *Usage
 }
 
-// EmbeddingRequest is the input to a Create embeddings request.
+// EmbeddingRequest contains all relevant fields for requests to the embeddings endpoint.
 type EmbeddingRequest struct {
 	// Input is a slice of strings for which you want to generate an Embedding vector.
 	// Each input must not exceed 2048 tokens in length.
