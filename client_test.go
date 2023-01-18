@@ -278,14 +278,12 @@ func handleImageEndpoint(w http.ResponseWriter, r *http.Request) {
 	if ir.N == 0 {
 		ir.N = 1
 	}
-	if ir.ResponseFormat == images.FormatInvalid {
-		ir.ResponseFormat = images.FormatURL
-	}
 
 	for i := 0; i < ir.N; i++ {
 		var imageData = &ImageData{}
 		switch ir.ResponseFormat {
-		case images.FormatURL:
+		// Invalid is the go default value, and URL is the default API behavior.
+		case images.FormatURL, images.FormatInvalid:
 			imageData.URL = params.Optional("https://example.com/image.png")
 		case images.FormatB64JSON:
 			// This decodes to "{}" in base64.

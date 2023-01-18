@@ -205,7 +205,7 @@ linters:
     - sqlclosecheck # Checks that sql.Rows and sql.Stmt are closed.
     - stylecheck # Stylecheck is a replacement for golint
     - tenv # tenv is analyzer that detects using os.Setenv instead of t.Setenv since Go1.17
-    - testpackage # linter that makes you use a separate _test package
+    # - testpackage # linter that makes you use a separate _test package
     - tparallel # tparallel detects inappropriate usage of t.Parallel() method in your Go test codes
     - unconvert # Remove unnecessary type conversions
     - unparam # Reports unused function parameters
