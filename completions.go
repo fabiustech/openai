@@ -117,14 +117,14 @@ type CompletionResponse struct {
 	Usage   *Usage              `json:"usage"`
 }
 
-// CreateCompletion ...
+// CreateCompletion creates a completion for the provided prompt and parameters.
 func (c *Client) CreateCompletion(ctx context.Context, cr *CompletionRequest) (*CompletionResponse, error) {
 	var b, err = c.post(ctx, routes.Completions, cr)
 	if err != nil {
 		return nil, err
 	}
 
-	var resp *CompletionResponse
+	var resp = &CompletionResponse{}
 	if err = json.Unmarshal(b, resp); err != nil {
 		return nil, err
 	}

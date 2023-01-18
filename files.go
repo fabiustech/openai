@@ -10,7 +10,7 @@ import (
 	"github.com/fabiustech/openai/routes"
 )
 
-// FileRequest ...
+// FileRequest contains all relevant data for upload requests to the files endpoint.
 type FileRequest struct {
 	// File is the JSON Lines file to be uploaded. If the purpose is set to "fine-tune", each line is a JSON record
 	// with "prompt" and "completion" fields representing your training examples:
@@ -44,36 +44,14 @@ type File struct {
 	Purpose   string         `json:"purpose"`
 }
 
-// UploadFile ...
-func (c *Client) UploadFile(ctx context.Context, fr *FileRequest) (*File, error) {
-	var b, err = c.postFile(ctx, fr)
-	if err != nil {
-		return nil, err
-	}
-
-	var f *File
-	if err = json.Unmarshal(b, f); err != nil {
-		return nil, err
-	}
-
-	return f, nil
-}
-
-// DeleteFile ...
-func (c *Client) DeleteFile(ctx context.Context, id string) error {
-	var _, err = c.delete(ctx, path.Join(routes.Files, id))
-
-	return err
-}
-
-// ListFiles ...
+// ListFiles returns a list of files that belong to the user's organization.
 func (c *Client) ListFiles(ctx context.Context) (*List[*File], error) {
 	var b, err = c.get(ctx, routes.Files)
 	if err != nil {
 		return nil, err
 	}
 
-	var fl *List[*File]
+	var fl = &List[*File]{}
 	if err = json.Unmarshal(b, fl); err != nil {
 		return nil, err
 	}
@@ -81,14 +59,37 @@ func (c *Client) ListFiles(ctx context.Context) (*List[*File], error) {
 	return fl, nil
 }
 
-// GetFile ...
-func (c *Client) GetFile(ctx context.Context, id string) (*File, error) {
+// UploadFile uploads a file that contains document(s) to be used across various endpoints/features. Currently, the size
+// of all the files uploaded by one organization can be up to 1 GB.
+func (c *Client) UploadFile(ctx context.Context, fr *FileRequest) (*File, error) {
+	var b, err = c.postFile(ctx, fr)
+	if err != nil {
+		return nil, err
+	}
+
+	var f = &File{}
+	if err = json.Unmarshal(b, f); err != nil {
+		return nil, err
+	}
+
+	return f, nil
+}
+
+// DeleteFile deletes a file.
+func (c *Client) DeleteFile(ctx context.Context, id string) error {
+	var _, err = c.delete(ctx, path.Join(routes.Files, id))
+
+	return err
+}
+
+// RetrieveFile returns information about a specific file.
+func (c *Client) RetrieveFile(ctx context.Context, id string) (*File, error) {
 	var b, err = c.get(ctx, path.Join(routes.Files, id))
 	if err != nil {
 		return nil, err
 	}
 
-	var f *File
+	var f = &File{}
 	if err = json.Unmarshal(b, f); err != nil {
 		return nil, err
 	}

@@ -16,7 +16,7 @@ type Engine struct {
 	Ready  bool   `json:"ready"`
 }
 
-// ListEngines Lists the currently available engines, and provides basic
+// ListEngines lists the currently available engines, and provides basic
 // information about each option such as the owner and availability.
 //
 // Deprecated: Please use their replacement, Models, instead.
@@ -27,7 +27,7 @@ func (c *Client) ListEngines(ctx context.Context) (*List[*Engine], error) {
 		return nil, err
 	}
 
-	var el *List[*Engine]
+	var el = &List[*Engine]{}
 	if err = json.Unmarshal(b, el); err != nil {
 		return nil, err
 	}
@@ -35,8 +35,7 @@ func (c *Client) ListEngines(ctx context.Context) (*List[*Engine], error) {
 	return el, nil
 }
 
-// GetEngine Retrieves an engine instance, providing basic information about
-// the engine such as the owner and availability.
+// GetEngine retrieves a model instance, providing basic information about it such as the owner and availability.
 //
 // Deprecated: Please use their replacement, Models, instead.
 // https://beta.openai.com/docs/api-reference/models
@@ -46,7 +45,7 @@ func (c *Client) GetEngine(ctx context.Context, id string) (*Engine, error) {
 		return nil, err
 	}
 
-	var e *Engine
+	var e = &Engine{}
 	if err = json.Unmarshal(b, e); err != nil {
 		return nil, err
 	}

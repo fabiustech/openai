@@ -26,6 +26,7 @@ type Client struct {
 	orgID *string
 
 	// scheme and host are only used for testing.
+	// TODO: Figure out a better approach.
 	scheme, host string
 }
 
@@ -48,6 +49,22 @@ func NewClientWithOrg(token, org string) *Client {
 	}
 }
 
+func (c *Client) newRequest(ctx context.Context, method string, url string, body io.Reader) (*http.Request, error) {
+	var req, err = http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Accept", "application/json; charset=utf-8")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.token))
+
+	if c.orgID != nil {
+		req.Header.Set("OpenAI-Organization", *c.orgID)
+	}
+
+	return req, nil
+}
+
 func (c *Client) post(ctx context.Context, path string, payload any) ([]byte, error) {
 	var b, err = json.Marshal(payload)
 	if err != nil {
@@ -55,16 +72,11 @@ func (c *Client) post(ctx context.Context, path string, payload any) ([]byte, er
 	}
 
 	var req *http.Request
-	req, err = http.NewRequestWithContext(ctx, "POST", c.reqURL(path), bytes.NewBuffer(b))
+	req, err = c.newRequest(ctx, "POST", c.reqURL(path), bytes.NewBuffer(b))
 	if err != nil {
 		return nil, err
 	}
-
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-
-	if c.orgID != nil {
-		req.Header.Set("OpenAI-Organization", *c.orgID)
-	}
 
 	var resp *http.Response
 	resp, err = http.DefaultClient.Do(req)
@@ -102,16 +114,12 @@ func (c *Client) postFile(ctx context.Context, fr *FileRequest) ([]byte, error) 
 	}
 
 	var req *http.Request
-	req, err = http.NewRequestWithContext(ctx, "POST", c.reqURL(routes.Files), &b)
+	req, err = c.newRequest(ctx, "POST", c.reqURL(routes.Files), &b)
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Set("Content-Type", w.FormDataContentType())
-
-	if c.orgID != nil {
-		req.Header.Set("OpenAI-Organization", *c.orgID)
-	}
 
 	var resp *http.Response
 	resp, err = http.DefaultClient.Do(req)
@@ -128,13 +136,9 @@ func (c *Client) postFile(ctx context.Context, fr *FileRequest) ([]byte, error) 
 }
 
 func (c *Client) get(ctx context.Context, path string) ([]byte, error) {
-	var req, err = http.NewRequestWithContext(ctx, "POST", c.reqURL(path), nil)
+	var req, err = c.newRequest(ctx, "POST", c.reqURL(path), nil)
 	if err != nil {
 		return nil, err
-	}
-
-	if c.orgID != nil {
-		req.Header.Set("OpenAI-Organization", *c.orgID)
 	}
 
 	var resp *http.Response
@@ -152,7 +156,7 @@ func (c *Client) get(ctx context.Context, path string) ([]byte, error) {
 }
 
 func (c *Client) delete(ctx context.Context, path string) ([]byte, error) {
-	var req, err = http.NewRequestWithContext(ctx, "DELETE", c.reqURL(path), nil)
+	var req, err = c.newRequest(ctx, "DELETE", c.reqURL(path), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -177,6 +181,7 @@ func (c *Client) reqURL(route string) string {
 		Host:   c.host,
 		Path:   path.Join(basePath, route),
 	}
+
 	return u.String()
 }
 

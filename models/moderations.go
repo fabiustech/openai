@@ -1,6 +1,6 @@
 package models
 
-// Moderation represents all models available for use with the Moderations endpoint.
+// Moderation represents all models available for use with the CreateModeration endpoint.
 type Moderation int
 
 const (

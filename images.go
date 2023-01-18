@@ -12,7 +12,7 @@ import (
 type CreateImageRequest struct {
 	// Prompt is a text description of the desired image(s). The maximum length is 1000 characters.
 	Prompt string `json:"prompt"`
-	*ImageRequestFields
+	ImageRequestFields
 }
 
 // EditImageRequest contains all relevant fields for requests to the images/edits endpoint.
@@ -25,14 +25,14 @@ type EditImageRequest struct {
 	Mask string `json:"mask,omitempty"`
 	// Prompt is a text description of the desired image(s). The maximum length is 1000 characters.
 	Prompt string `json:"prompt"`
-	*ImageRequestFields
+	ImageRequestFields
 }
 
 // VariationImageRequest contains all relevant fields for requests to the images/variations endpoint.
 type VariationImageRequest struct {
 	// Image is the image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
 	Image string `json:"image"`
-	*ImageRequestFields
+	ImageRequestFields
 }
 
 // ImageRequestFields contains the common fields for all images endpoints.
@@ -66,14 +66,14 @@ type ImageData struct {
 	B64JSON *string `json:"b64_json,omitempty"`
 }
 
-// CreateImage ...
+// CreateImage creates an image (or images) given a prompt.
 func (c *Client) CreateImage(ctx context.Context, ir *CreateImageRequest) (*ImageResponse, error) {
 	var b, err = c.post(ctx, routes.ImageGenerations, ir)
 	if err != nil {
 		return nil, err
 	}
 
-	var resp *ImageResponse
+	var resp = &ImageResponse{}
 	if err = json.Unmarshal(b, resp); err != nil {
 		return nil, err
 	}
@@ -81,14 +81,14 @@ func (c *Client) CreateImage(ctx context.Context, ir *CreateImageRequest) (*Imag
 	return resp, nil
 }
 
-// EditImage ...
+// EditImage creates an edited or extended image (or images) given an original image and a prompt.
 func (c *Client) EditImage(ctx context.Context, eir *EditImageRequest) (*ImageResponse, error) {
 	var b, err = c.post(ctx, routes.ImageEdits, eir)
 	if err != nil {
 		return nil, err
 	}
 
-	var resp *ImageResponse
+	var resp = &ImageResponse{}
 	if err = json.Unmarshal(b, resp); err != nil {
 		return nil, err
 	}
@@ -96,14 +96,14 @@ func (c *Client) EditImage(ctx context.Context, eir *EditImageRequest) (*ImageRe
 	return resp, nil
 }
 
-// ImageVariation ...
+// ImageVariation creates a variation (or variations) of a given image.
 func (c *Client) ImageVariation(ctx context.Context, vir *VariationImageRequest) (*ImageResponse, error) {
 	var b, err = c.post(ctx, routes.ImageVariations, vir)
 	if err != nil {
 		return nil, err
 	}
 
-	var resp *ImageResponse
+	var resp = &ImageResponse{}
 	if err = json.Unmarshal(b, resp); err != nil {
 		return nil, err
 	}

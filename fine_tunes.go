@@ -135,14 +135,15 @@ type FineTuneDeletionResponse struct {
 	Deleted bool           `json:"deleted"`
 }
 
-// CreateFineTune ...
+// CreateFineTune creates a job that fine-tunes a specified model from a given dataset. *FineTuneResponse includes
+// details of the enqueued job including job status and the name of the fine-tuned models once complete.
 func (c *Client) CreateFineTune(ctx context.Context, ftr *FineTuneRequest) (*FineTuneResponse, error) {
 	var b, err = c.post(ctx, routes.FineTunes, ftr)
 	if err != nil {
 		return nil, err
 	}
 
-	var f *FineTuneResponse
+	var f = &FineTuneResponse{}
 	if err = json.Unmarshal(b, f); err != nil {
 		return nil, err
 	}
@@ -150,13 +151,14 @@ func (c *Client) CreateFineTune(ctx context.Context, ftr *FineTuneRequest) (*Fin
 	return f, nil
 }
 
+// ListFineTunes lists your organization's fine-tuning jobs.
 func (c *Client) ListFineTunes(ctx context.Context) (*List[*FineTuneResponse], error) {
 	var b, err = c.get(ctx, routes.FineTunes)
 	if err != nil {
 		return nil, err
 	}
 
-	var l *List[*FineTuneResponse]
+	var l = &List[*FineTuneResponse]{}
 	if err = json.Unmarshal(b, l); err != nil {
 		return nil, err
 	}
@@ -164,13 +166,14 @@ func (c *Client) ListFineTunes(ctx context.Context) (*List[*FineTuneResponse], e
 	return l, nil
 }
 
+// RetrieveFineTune gets info about the fine-tune job.
 func (c *Client) RetrieveFineTune(ctx context.Context, id string) (*FineTuneResponse, error) {
 	var b, err = c.get(ctx, path.Join(routes.FineTunes, id))
 	if err != nil {
 		return nil, err
 	}
 
-	var f *FineTuneResponse
+	var f = &FineTuneResponse{}
 	if err = json.Unmarshal(b, f); err != nil {
 		return nil, err
 	}
@@ -178,13 +181,14 @@ func (c *Client) RetrieveFineTune(ctx context.Context, id string) (*FineTuneResp
 	return f, nil
 }
 
+// CancelFineTune immediately cancels a fine-tune job.
 func (c *Client) CancelFineTune(ctx context.Context, id string) (*FineTuneResponse, error) {
 	var b, err = c.post(ctx, path.Join(routes.FineTunes, id, "cancel"), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var f *FineTuneResponse
+	var f = &FineTuneResponse{}
 	if err = json.Unmarshal(b, f); err != nil {
 		return nil, err
 	}
@@ -192,6 +196,7 @@ func (c *Client) CancelFineTune(ctx context.Context, id string) (*FineTuneRespon
 	return f, nil
 }
 
+// ListFineTuneEvents returns fine-grained status updates for a fine-tune job.
 // TODO: Support streaming (in a different method).
 func (c *Client) ListFineTuneEvents(ctx context.Context, id string) (*List[*Event], error) {
 	var b, err = c.get(ctx, path.Join(routes.FineTunes, id, "events"))
@@ -199,7 +204,7 @@ func (c *Client) ListFineTuneEvents(ctx context.Context, id string) (*List[*Even
 		return nil, err
 	}
 
-	var l *List[*Event]
+	var l = &List[*Event]{}
 	if err = json.Unmarshal(b, l); err != nil {
 		return nil, err
 	}
@@ -207,13 +212,14 @@ func (c *Client) ListFineTuneEvents(ctx context.Context, id string) (*List[*Even
 	return l, nil
 }
 
+// DeleteFineTune delete a fine-tuned model. You must have the Owner role in your organization.
 func (c *Client) DeleteFineTune(ctx context.Context, id string) (*FineTuneDeletionResponse, error) {
 	var b, err = c.delete(ctx, path.Join(routes.FineTunes, id))
 	if err != nil {
 		return nil, err
 	}
 
-	var f *FineTuneDeletionResponse
+	var f = &FineTuneDeletionResponse{}
 	if err = json.Unmarshal(b, f); err != nil {
 		return nil, err
 	}

@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -22,7 +23,8 @@ import (
 )
 
 /*
-This test suite has been ported from the original repo:
+This test suite has been ported from the original repo: https://github.com/sashabaranov/go-gpt3.
+It is incomplete, and it's usefulness is questionable.
 
 TODO: Cover all endpoints.
 */
@@ -56,9 +58,9 @@ func TestAPI(t *testing.T) {
 	}
 
 	if len(fl.Data) > 0 {
-		_, err = c.GetFile(ctx, fl.Data[0].ID)
+		_, err = c.RetrieveFile(ctx, fl.Data[0].ID)
 		if err != nil {
-			t.Fatalf("GetFile error: %v", err)
+			t.Fatalf("RetrieveFile error: %v", err)
 		}
 	}
 
@@ -74,12 +76,17 @@ func TestAPI(t *testing.T) {
 	}
 }
 
-func newTestClient(host string) *Client {
+func newTestClient(u string) (*Client, error) {
+	var h, err = url.Parse(u)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Client{
 		token:  testToken,
-		host:   host,
+		host:   h.Host,
 		scheme: "http",
-	}
+	}, nil
 }
 
 // TestCompletions Tests the completions endpoint of the API using the mocked server.
@@ -88,10 +95,9 @@ func TestCompletions(t *testing.T) {
 	ts.Start()
 	defer ts.Close()
 
-	var client = newTestClient(ts.URL)
-	ctx := context.Background()
+	var client, _ = newTestClient(ts.URL)
 
-	var _, err = client.CreateCompletion(ctx, &CompletionRequest{
+	var _, err = client.CreateCompletion(context.Background(), &CompletionRequest{
 		Prompt:    "Lorem ipsum",
 		Model:     models.TextDavinci003,
 		MaxTokens: 5,
@@ -107,11 +113,10 @@ func TestEdits(t *testing.T) {
 	ts.Start()
 	defer ts.Close()
 
-	var client = newTestClient(ts.URL)
-	ctx := context.Background()
+	var client, _ = newTestClient(ts.URL)
 
 	var n = 3
-	var resp, err = client.CreateEdit(ctx, &EditsRequest{
+	var resp, err = client.CreateEdit(context.Background(), &EditsRequest{
 		Model: models.TextDavinciEdit001,
 		Input: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
 			"sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim" +
@@ -271,24 +276,31 @@ func handleCompletionEndpoint(w http.ResponseWriter, r *http.Request) {
 
 // handleImageEndpoint Handles the images endpoint by the test server.
 func handleImageEndpoint(w http.ResponseWriter, r *http.Request) {
-	var err error
-	var resBytes []byte
-
-	// imagess only accepts POST requests
+	// Images only accepts POST requests.
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-	var imageReq *CreateImageRequest
-	if imageReq, err = getImageBody(r); err != nil {
+	var ir, err = getImageBody(r)
+	if err != nil {
 		http.Error(w, "could not read request", http.StatusInternalServerError)
 		return
 	}
-	res := &ImageResponse{
+
+	var resp = &ImageResponse{
 		Created: uint64(time.Now().Unix()),
 	}
-	for i := 0; i < imageReq.N; i++ {
+
+	// Handle default values.
+	if ir.N == 0 {
+		ir.N = 1
+	}
+	if ir.ResponseFormat == images.FormatInvalid {
+		ir.ResponseFormat = images.FormatURL
+	}
+
+	for i := 0; i < ir.N; i++ {
 		var imageData = &ImageData{}
-		switch imageReq.ResponseFormat {
+		switch ir.ResponseFormat {
 		case images.FormatURL:
 			imageData.URL = params.Optional("https://example.com/image.png")
 		case images.FormatB64JSON:
@@ -298,10 +310,11 @@ func handleImageEndpoint(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "invalid response format", http.StatusBadRequest)
 			return
 		}
-		res.Data = append(res.Data, imageData)
+		resp.Data = append(resp.Data, imageData)
 	}
-	resBytes, _ = json.Marshal(res)
-	fmt.Fprintln(w, string(resBytes))
+
+	var b, _ = json.Marshal(resp)
+	w.Write(b)
 }
 
 // getCompletionBody Returns the body of the request to create a completion.
@@ -331,6 +344,7 @@ func getImageBody(r *http.Request) (*CreateImageRequest, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return image, nil
 }
 
@@ -344,19 +358,12 @@ func numTokens(s string) int {
 }
 
 func TestImages(t *testing.T) {
-	// create the test server
-	var err error
-	ts := OpenAITestServer()
+	var ts = OpenAITestServer()
 	ts.Start()
 	defer ts.Close()
 
-	client := NewClient(testToken)
-	ctx := context.Background()
-	// client.BaseURL = ts.URL + "/v1"
-
-	req := &CreateImageRequest{}
-	req.Prompt = "Lorem ipsum"
-	_, err = client.CreateImage(ctx, req)
+	var client, _ = newTestClient(ts.URL)
+	var _, err = client.CreateImage(context.Background(), &CreateImageRequest{Prompt: "Lorem ipsum"})
 	if err != nil {
 		t.Fatalf("CreateImage error: %v", err)
 	}

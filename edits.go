@@ -47,11 +47,11 @@ type EditsResponse struct {
 	Choices []*EditsChoice `json:"choices"`
 }
 
-// CreateEdit ...
+// CreateEdit creates a new edit for the provided input, instruction, and parameters.
 func (c *Client) CreateEdit(ctx context.Context, er *EditsRequest) (*EditsResponse, error) {
 	var b, err = c.post(ctx, routes.Edits, er)
 
-	var resp *EditsResponse
+	var resp = &EditsResponse{}
 	if err = json.Unmarshal(b, resp); err != nil {
 		return nil, err
 	}

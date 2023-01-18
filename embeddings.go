@@ -30,29 +30,23 @@ type EmbeddingResponse struct {
 
 // EmbeddingRequest contains all relevant fields for requests to the embeddings endpoint.
 type EmbeddingRequest struct {
-	// Input is a slice of strings for which you want to generate an Embedding vector.
-	// Each input must not exceed 2048 tokens in length.
-	// OpenAPI suggests replacing newlines (\n) in your input with a single space, as they
-	// have observed inferior results when newlines are present.
-	// E.g.
-	//	"The food was delicious and the waiter..."
+	// Input represents input text to get embeddings for, encoded as a strings. To get embeddings for multiple inputs in
+	//a single request, pass a slice of length > 1. Each input string must not exceed 8192 tokens in length.
 	Input []string `json:"input"`
-	// ID of the model to use. You can use the List models API to see all of your available models,
-	// or see our Model overview for descriptions of them.
+	// Model is the ID of the model to use.
 	Model models.Embedding `json:"model"`
-	// A unique identifier representing your end-user, which will help OpenAI to monitor and detect abuse.
+	// User is a unique identifier representing your end-user, which will help OpenAI to monitor and detect abuse.
 	User string `json:"user"`
 }
 
-// CreateEmbeddings returns an EmbeddingResponse which will contain an Embedding for every item in |request.Input|.
-// https://beta.openai.com/docs/api-reference/embeddings/create
+// CreateEmbeddings creates an embedding vector representing the input text.
 func (c *Client) CreateEmbeddings(ctx context.Context, request *EmbeddingRequest) (*EmbeddingResponse, error) {
 	var b, err = c.post(ctx, routes.Embeddings, request)
 	if err != nil {
 		return nil, err
 	}
 
-	var resp *EmbeddingResponse
+	var resp = &EmbeddingResponse{}
 	if err = json.Unmarshal(b, resp); err != nil {
 		return nil, err
 	}

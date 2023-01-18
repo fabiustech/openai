@@ -54,14 +54,14 @@ type ModerationResponse struct {
 	Results []Result `json:"results"`
 }
 
-// Moderations ...
-func (c *Client) Moderations(ctx context.Context, mr *ModerationRequest) (*ModerationResponse, error) {
+// CreateModeration classifies if text violates OpenAI's Content Policy.
+func (c *Client) CreateModeration(ctx context.Context, mr *ModerationRequest) (*ModerationResponse, error) {
 	var b, err = c.post(ctx, routes.Moderations, mr)
 	if err != nil {
 		return nil, err
 	}
 
-	var resp *ModerationResponse
+	var resp = &ModerationResponse{}
 	if err = json.Unmarshal(b, resp); err != nil {
 		return nil, err
 	}
