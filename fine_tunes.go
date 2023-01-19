@@ -101,12 +101,12 @@ type Event struct {
 
 // FineTuneResponse is the response from fine-tunes endpoints.
 type FineTuneResponse struct {
-	ID             string          `json:"id"`
-	Object         objects.Object  `json:"object"`
-	Model          models.FineTune `json:"model"`
-	CreatedAt      uint64          `json:"created_at"`
-	Events         []*Event        `json:"events,omitempty"`
-	FineTunedModel *string         `json:"fine_tuned_model"`
+	ID             string                 `json:"id"`
+	Object         objects.Object         `json:"object"`
+	Model          models.FineTune        `json:"model"`
+	CreatedAt      uint64                 `json:"created_at"`
+	Events         []*Event               `json:"events,omitempty"`
+	FineTunedModel *models.FineTunedModel `json:"fine_tuned_model"`
 	Hyperparams    struct {
 		BatchSize              int     `json:"batch_size"`
 		LearningRateMultiplier float64 `json:"learning_rate_multiplier"`

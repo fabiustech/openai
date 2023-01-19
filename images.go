@@ -12,7 +12,20 @@ import (
 type CreateImageRequest struct {
 	// Prompt is a text description of the desired image(s). The maximum length is 1000 characters.
 	Prompt string `json:"prompt"`
-	ImageRequestFields
+	// N specifies the number of images to generate. Must be between 1 and 10.
+	// Defaults to 1.
+	N int `json:"n,omitempty"`
+	// Size specifies the size of the generated images. Must be one of images.Size256x256, images.Size512x512, or
+	// images.Size1024x1024.
+	// Defaults to images.Size1024x1024.
+	Size images.Size `json:"size,omitempty"`
+	// ResponseFormat specifies the format in which the generated images are returned. Must be one of images.FormatURL
+	// or images.FormatB64JSON.
+	// Defaults to images.FormatURL.
+	ResponseFormat images.Format `json:"response_format,omitempty"`
+	// User specifies a unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse:
+	// https://beta.openai.com/docs/guides/safety-best-practices/end-user-ids.
+	User string `json:"user,omitempty"`
 }
 
 // EditImageRequest contains all relevant fields for requests to the images/edits endpoint.
@@ -25,18 +38,26 @@ type EditImageRequest struct {
 	Mask string `json:"mask,omitempty"`
 	// Prompt is a text description of the desired image(s). The maximum length is 1000 characters.
 	Prompt string `json:"prompt"`
-	ImageRequestFields
+	// N specifies the number of images to generate. Must be between 1 and 10.
+	// Defaults to 1.
+	N int `json:"n,omitempty"`
+	// Size specifies the size of the generated images. Must be one of images.Size256x256, images.Size512x512, or
+	// images.Size1024x1024.
+	// Defaults to images.Size1024x1024.
+	Size images.Size `json:"size,omitempty"`
+	// ResponseFormat specifies the format in which the generated images are returned. Must be one of images.FormatURL
+	// or images.FormatB64JSON.
+	// Defaults to images.FormatURL.
+	ResponseFormat images.Format `json:"response_format,omitempty"`
+	// User specifies a unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse:
+	// https://beta.openai.com/docs/guides/safety-best-practices/end-user-ids.
+	User string `json:"user,omitempty"`
 }
 
 // VariationImageRequest contains all relevant fields for requests to the images/variations endpoint.
 type VariationImageRequest struct {
 	// Image is the image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
 	Image string `json:"image"`
-	ImageRequestFields
-}
-
-// ImageRequestFields contains the common fields for all images endpoints.
-type ImageRequestFields struct {
 	// N specifies the number of images to generate. Must be between 1 and 10.
 	// Defaults to 1.
 	N int `json:"n,omitempty"`

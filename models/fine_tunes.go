@@ -57,3 +57,12 @@ var stringToFineTune = map[string]FineTune{
 	"ada":     Ada,
 	"babbage": Babbage,
 }
+
+// FineTunedModel represents the name of a fine-tuned model which was
+// previously generated.
+type FineTunedModel string
+
+// NewFineTunedModel converts a string to FineTunedModel.
+func NewFineTunedModel(name string) FineTunedModel {
+	return FineTunedModel(name)
+}
