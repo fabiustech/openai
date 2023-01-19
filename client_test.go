@@ -97,7 +97,7 @@ func TestCompletions(t *testing.T) {
 
 	var client, _ = newTestClient(ts.URL)
 
-	var _, err = client.CreateCompletion(context.Background(), &CompletionRequest{
+	var _, err = client.CreateCompletion(context.Background(), &CompletionRequest[models.Completion]{
 		Prompt:    "Lorem ipsum",
 		Model:     models.TextDavinci003,
 		MaxTokens: 5,
@@ -221,12 +221,12 @@ func handleCompletionEndpoint(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-	var completionReq *CompletionRequest
+	var completionReq *CompletionRequest[models.Completion]
 	if completionReq, err = getCompletionBody(r); err != nil {
 		http.Error(w, "could not read request", http.StatusInternalServerError)
 		return
 	}
-	res := &CompletionResponse{
+	res := &CompletionResponse[models.Completion]{
 		ID:      strconv.Itoa(int(time.Now().Unix())),
 		Object:  objects.TextCompletion,
 		Created: uint64(time.Now().Unix()),
@@ -300,8 +300,8 @@ func handleImageEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 // getCompletionBody Returns the body of the request to create a completion.
-func getCompletionBody(r *http.Request) (*CompletionRequest, error) {
-	var completion = &CompletionRequest{}
+func getCompletionBody(r *http.Request) (*CompletionRequest[models.Completion], error) {
+	var completion = &CompletionRequest[models.Completion]{}
 	// read the request body
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
