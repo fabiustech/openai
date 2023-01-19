@@ -372,7 +372,7 @@ func OpenAITestServer() *httptest.Server {
 			return
 		case "/v1/images/generations":
 			handleImageEndpoint(w, r)
-		// TODO: implement the other endpoints
+		// TODO: Implement the other endpoints.
 		default:
 			// the endpoint doesn't exist
 			http.Error(w, "the resource path doesn't exist", http.StatusNotFound)

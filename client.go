@@ -20,7 +20,7 @@ const (
 	basePath = "v1"
 )
 
-// Client is OpenAI GPT-3 API client.
+// Client is OpenAI API client.
 type Client struct {
 	token string
 	orgID *string
