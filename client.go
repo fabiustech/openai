@@ -92,6 +92,64 @@ func (c *Client) post(ctx context.Context, path string, payload any) ([]byte, er
 	return io.ReadAll(resp.Body)
 }
 
+func (c *Client) postStream(ctx context.Context, path string, payload any) (<-chan []byte, <-chan error, error) {
+	var b, err = json.Marshal(payload)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var req *http.Request
+	req, err = c.newRequest(ctx, "POST", c.reqURL(path), bytes.NewBuffer(b))
+	if err != nil {
+		return nil, nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header.Set("Accept", "text/event-stream; charset=utf-8")
+	req.Header.Set("Connection", "keep-alive")
+	req.Header.Set("Cache-Control", "no-cache")
+
+	var resp *http.Response
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if err = interpretResponse(resp); err != nil {
+		return nil, nil, err
+	}
+
+	var events = make(chan []byte)
+	var errCh = make(chan error)
+
+	go func() {
+		defer resp.Body.Close()
+		defer close(events)
+		defer close(errCh)
+
+		for {
+			var msg = make([]byte, 1024)
+			_, err = resp.Body.Read(msg)
+
+			switch {
+			case err == io.EOF:
+				return
+			case err != nil:
+				errCh <- err
+				return
+			case ctx.Err() != nil:
+				errCh <- ctx.Err()
+				return
+			default:
+				// No-op.
+			}
+
+			events <- msg
+		}
+	}()
+
+	return events, errCh, nil
+}
+
 func (c *Client) postFile(ctx context.Context, fr *FileRequest) ([]byte, error) {
 	var b bytes.Buffer
 	var w = multipart.NewWriter(&b)
