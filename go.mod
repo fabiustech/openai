@@ -1,3 +1,3 @@
-module github.com/sashabaranov/go-gpt3
+module github.com/fabiustech/openai
 
-go 1.17
+go 1.19

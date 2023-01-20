@@ -188,7 +188,7 @@ linters:
     - gomodguard # Allow and block list linter for direct Go module dependencies. This is different from depguard where there are different block types for example version constraints and module recommendations.
     - goprintffuncname # Checks that printf-like functions are named with f at the end
     - gosec # Inspects source code for security problems
-    - lll # Reports long lines
+    # - lll # Reports long lines
     - makezero # Finds slice declarations with non-zero initial length
     # - nakedret # Finds naked returns in functions greater than a specified function length
     - nestif # Reports deeply nested if statements
@@ -205,7 +205,7 @@ linters:
     - sqlclosecheck # Checks that sql.Rows and sql.Stmt are closed.
     - stylecheck # Stylecheck is a replacement for golint
     - tenv # tenv is analyzer that detects using os.Setenv instead of t.Setenv since Go1.17
-    - testpackage # linter that makes you use a separate _test package
+    # - testpackage # linter that makes you use a separate _test package
     - tparallel # tparallel detects inappropriate usage of t.Parallel() method in your Go test codes
     - unconvert # Remove unnecessary type conversions
     - unparam # Reports unused function parameters
