@@ -157,25 +157,18 @@ func (c *Client) CreateStreamingCompletion(ctx context.Context, cr *CompletionRe
 		for {
 			select {
 			case b := <-receive:
-				var events [][]byte
-				var done bool
+				var events []*CompletionResponse[models.Completion]
 				events, err = parseEvents(b)
-				if err == io.EOF {
-					done = true
+				if err != nil && !errors.Is(err, io.EOF) {
+					errCh <- err
+					return
 				}
 
 				for _, event := range events {
-					var resp = &CompletionResponse[models.Completion]{}
-
-					if err = json.Unmarshal(event, resp); err != nil {
-						errCh <- err
-						return
-					}
-
-					resps <- resp
+					resps <- event
 				}
 
-				if done {
+				if errors.Is(err, io.EOF) {
 					return
 				}
 			case err = <-errs:
@@ -196,27 +189,32 @@ const eof = "[DONE]"
 
 var ErrBadPrefix = errors.New("unexpected event received")
 
-func parseEvents(b []byte) ([][]byte, error) {
+func parseEvents(b []byte) ([]*CompletionResponse[models.Completion], error) {
 	if !strings.HasPrefix(string(b), eventPrefix) {
 		return nil, ErrBadPrefix
 	}
 
 	var split = strings.Split(string(b), eventPrefix)
-	var out [][]byte
+	var out []*CompletionResponse[models.Completion]
 
-	var err error
+	var eofErr error
 
 	for _, event := range split[1:] {
 		var msg = strings.TrimRight(event, "\r\n\x00")
 		if msg == eof {
-			err = io.EOF
+			eofErr = io.EOF
 			continue
 		}
 
-		out = append(out, []byte(msg))
+		var resp = &CompletionResponse[models.Completion]{}
+		if err := json.Unmarshal([]byte(event), resp); err != nil {
+			return nil, err
+		}
+
+		out = append(out, resp)
 	}
 
-	return out, err
+	return out, eofErr
 }
 
 // CreateFineTunedCompletion creates a completion for the provided prompt and parameters, using a fine-tuned model.

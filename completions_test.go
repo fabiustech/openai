@@ -1,6 +1,7 @@
 package openai
 
 import (
+	"errors"
 	"io"
 	"testing"
 )
@@ -50,8 +51,8 @@ data: [DONE]
 		if len(out) != len(tc.out) {
 			t.Fatal("mismatched event counts")
 		}
-		if err != tc.err {
-			t.Fatalf("expected err=%v, got err=%v", tc.err, err)
+		if !errors.Is(err, tc.err) {
+			t.Fatalf("expected err=%v, got err=%v, tc=%s", tc.err, err, string(tc.in))
 		}
 	}
 }

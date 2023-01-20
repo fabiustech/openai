@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -92,6 +93,8 @@ func (c *Client) post(ctx context.Context, path string, payload any) ([]byte, er
 	return io.ReadAll(resp.Body)
 }
 
+const bufferSize = 1024
+
 func (c *Client) postStream(ctx context.Context, path string, payload any) (<-chan []byte, <-chan error, error) {
 	var b, err = json.Marshal(payload)
 	if err != nil {
@@ -115,6 +118,7 @@ func (c *Client) postStream(ctx context.Context, path string, payload any) (<-ch
 	}
 
 	if err = interpretResponse(resp); err != nil {
+		_ = resp.Body.Close()
 		return nil, nil, err
 	}
 
@@ -122,16 +126,16 @@ func (c *Client) postStream(ctx context.Context, path string, payload any) (<-ch
 	var errCh = make(chan error)
 
 	go func() {
-		defer resp.Body.Close()
+		defer func() { errCh <- resp.Body.Close() }()
 		defer close(events)
 		defer close(errCh)
 
 		for {
-			var msg = make([]byte, 1024)
+			var msg = make([]byte, bufferSize)
 			_, err = resp.Body.Read(msg)
 
 			switch {
-			case err == io.EOF:
+			case errors.Is(err, io.EOF):
 				return
 			case err != nil:
 				errCh <- err
