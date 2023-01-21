@@ -3,6 +3,9 @@ package openai
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"io"
+	"strings"
 
 	"github.com/fabiustech/openai/models"
 	"github.com/fabiustech/openai/objects"
@@ -45,10 +48,6 @@ type CompletionRequest[T models.Completion | models.FineTunedModel] struct {
 	// and ensure that you have reasonable settings for max_tokens and stop.
 	// Defaults to 1.
 	N int `json:"n,omitempty"`
-	// Steam specifies Whether to stream back partial progress. If set, tokens will be sent as data-only server-sent
-	// events as they become available, with the stream terminated by a data: [DONE] message.
-	// Defaults to false.
-	Stream bool `json:"stream,omitempty"`
 	// LogProbs specifies to include the log probabilities on the logprobs most likely tokens, as well the chosen
 	// tokens. For example, if logprobs is 5, the API will return a list of the 5 most likely tokens. The API will
 	// always return the logprob of the sampled token, so there may be up to logprobs+1 elements in the response.
@@ -97,7 +96,7 @@ type CompletionRequest[T models.Completion | models.FineTunedModel] struct {
 type CompletionChoice struct {
 	Text         string         `json:"text"`
 	Index        int            `json:"index"`
-	FinishReason string         `json:"finish_reason"`
+	FinishReason *string        `json:"finish_reason,omitempty"`
 	LogProbs     *LogprobResult `json:"logprobs"`
 }
 
@@ -116,7 +115,7 @@ type CompletionResponse[T models.Completion | models.FineTunedModel] struct {
 	Created uint64              `json:"created"`
 	Model   T                   `json:"model"`
 	Choices []*CompletionChoice `json:"choices"`
-	Usage   *Usage              `json:"usage"`
+	Usage   *Usage              `json:"usage,omitempty"`
 }
 
 // CreateCompletion creates a completion for the provided prompt and parameters.
@@ -132,6 +131,90 @@ func (c *Client) CreateCompletion(ctx context.Context, cr *CompletionRequest[mod
 	}
 
 	return resp, nil
+}
+
+type streamingCompletion struct {
+	Stream bool `json:"stream"`
+	*CompletionRequest[models.Completion]
+}
+
+func (c *Client) CreateStreamingCompletion(ctx context.Context, cr *CompletionRequest[models.Completion]) (<-chan *CompletionResponse[models.Completion], <-chan error, error) {
+	var receive, errs, err = c.postStream(ctx, routes.Completions, &streamingCompletion{
+		Stream:            true,
+		CompletionRequest: cr,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var resps = make(chan *CompletionResponse[models.Completion])
+	var errCh = make(chan error)
+
+	go func() {
+		defer close(resps)
+		defer close(errCh)
+
+		for {
+			select {
+			case b := <-receive:
+				var events []*CompletionResponse[models.Completion]
+				events, err = parseEvents(b)
+				if err != nil && !errors.Is(err, io.EOF) {
+					errCh <- err
+					return
+				}
+
+				for _, event := range events {
+					resps <- event
+				}
+
+				if errors.Is(err, io.EOF) {
+					return
+				}
+			case err = <-errs:
+				errCh <- err
+				return
+			case <-ctx.Done():
+				errCh <- ctx.Err()
+				return
+			}
+		}
+	}()
+
+	return resps, errCh, nil
+}
+
+const eventPrefix = "data: "
+const eof = "[DONE]"
+
+var ErrBadPrefix = errors.New("unexpected event received")
+
+func parseEvents(b []byte) ([]*CompletionResponse[models.Completion], error) {
+	if !strings.HasPrefix(string(b), eventPrefix) {
+		return nil, ErrBadPrefix
+	}
+
+	var split = strings.Split(string(b), eventPrefix)
+	var out []*CompletionResponse[models.Completion]
+
+	var eofErr error
+
+	for _, event := range split[1:] {
+		var msg = strings.TrimRight(event, "\r\n\x00")
+		if msg == eof {
+			eofErr = io.EOF
+			continue
+		}
+
+		var resp = &CompletionResponse[models.Completion]{}
+		if err := json.Unmarshal([]byte(event), resp); err != nil {
+			return nil, err
+		}
+
+		out = append(out, resp)
+	}
+
+	return out, eofErr
 }
 
 // CreateFineTunedCompletion creates a completion for the provided prompt and parameters, using a fine-tuned model.
