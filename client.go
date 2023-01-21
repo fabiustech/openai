@@ -127,7 +127,7 @@ func (c *Client) postStream(ctx context.Context, path string, payload any) (<-ch
 		defer close(errCh)
 
 		for {
-			var msg = make([]byte, 1024)
+			var msg = make([]byte, 2048)
 			_, err = resp.Body.Read(msg)
 
 			switch {

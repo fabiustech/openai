@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
 
@@ -168,6 +169,7 @@ func (c *Client) CreateStreamingCompletion(ctx context.Context, cr *CompletionRe
 					var resp = &CompletionResponse[models.Completion]{}
 
 					if err = json.Unmarshal(event, resp); err != nil {
+						fmt.Println(string(event))
 						errCh <- err
 						return
 					}
