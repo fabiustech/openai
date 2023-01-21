@@ -93,7 +93,7 @@ func (c *Client) post(ctx context.Context, path string, payload any) ([]byte, er
 	return io.ReadAll(resp.Body)
 }
 
-const bufferSize = 2048
+const bufferSize = 4096
 
 func (c *Client) postStream(ctx context.Context, path string, payload any) (<-chan []byte, <-chan error, error) {
 	var b, err = json.Marshal(payload)
