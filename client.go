@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -91,67 +90,6 @@ func (c *Client) post(ctx context.Context, path string, payload any) ([]byte, er
 	}
 
 	return io.ReadAll(resp.Body)
-}
-
-const bufferSize = 1024
-
-func (c *Client) postStream(ctx context.Context, path string, payload any) (<-chan []byte, <-chan error, error) {
-	var b, err = json.Marshal(payload)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var req *http.Request
-	req, err = c.newRequest(ctx, "POST", c.reqURL(path), bytes.NewBuffer(b))
-	if err != nil {
-		return nil, nil, err
-	}
-	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("Accept", "text/event-stream; charset=utf-8")
-	req.Header.Set("Connection", "keep-alive")
-	req.Header.Set("Cache-Control", "no-cache")
-
-	var resp *http.Response
-	resp, err = http.DefaultClient.Do(req) //nolint:bodyclose // The body is closed, either in the error check or the go routine.
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if err = interpretResponse(resp); err != nil {
-		_ = resp.Body.Close()
-		return nil, nil, err
-	}
-
-	var events = make(chan []byte)
-	var errCh = make(chan error)
-
-	go func() {
-		defer func() { errCh <- resp.Body.Close() }()
-		defer close(events)
-		defer close(errCh)
-
-		for {
-			var msg = make([]byte, bufferSize)
-			_, err = resp.Body.Read(msg)
-
-			switch {
-			case errors.Is(err, io.EOF):
-				return
-			case err != nil:
-				errCh <- err
-				return
-			case ctx.Err() != nil:
-				errCh <- ctx.Err()
-				return
-			default:
-				// No-op.
-			}
-
-			events <- msg
-		}
-	}()
-
-	return events, errCh, nil
 }
 
 func (c *Client) postFile(ctx context.Context, fr *FileRequest) ([]byte, error) {
