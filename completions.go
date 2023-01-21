@@ -161,7 +161,7 @@ func (c *Client) CreateStreamingCompletion(ctx context.Context, cr *CompletionRe
 				var events [][]byte
 				var done bool
 				events, err = parseEvents(b)
-				if err == io.EOF {
+				if errors.Is(err, io.EOF) {
 					done = true
 				}
 
