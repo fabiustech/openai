@@ -112,7 +112,8 @@ func (c *Client) postStream(ctx context.Context, path string, payload any) (<-ch
 	req.Header.Set("Cache-Control", "no-cache")
 
 	var resp *http.Response
-	resp, err = http.DefaultClient.Do(req)
+	// The body is closed, either in the error check or the go routine.
+	resp, err = http.DefaultClient.Do(req) //nolint:bodyclose
 	if err != nil {
 		return nil, nil, err
 	}
