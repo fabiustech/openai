@@ -51,7 +51,7 @@ data: [DONE]
 		if len(out) != len(tc.out) {
 			t.Fatal("mismatched event counts")
 		}
-		if !errors.Is(err, io.EOF) {
+		if !errors.Is(err, tc.err) {
 			t.Fatalf("expected err=%v, got err=%v", tc.err, err)
 		}
 	}
