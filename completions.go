@@ -138,6 +138,10 @@ type streamingCompletion struct {
 	*CompletionRequest[models.Completion]
 }
 
+// CreateStreamingCompletion returns two channels: the first will be sent *CompletionResponse[models.Completion]s as
+// they are received from the API and the second is sent any error(s) encountered while receiving / parsing responses.
+// Both channels will be closed on receipt of the "[DONE]" event or upon the first encountered error.
+// An err is returned if any error occurred prior to receiving an initial response from the API.
 func (c *Client) CreateStreamingCompletion(ctx context.Context, cr *CompletionRequest[models.Completion]) (<-chan *CompletionResponse[models.Completion], <-chan error, error) {
 	var receive, errs, err = c.postStream(ctx, routes.Completions, &streamingCompletion{
 		Stream:            true,
@@ -194,6 +198,8 @@ func (c *Client) CreateStreamingCompletion(ctx context.Context, cr *CompletionRe
 const eventPrefix = "data: "
 const eof = "[DONE]"
 
+// ErrBadPrefix is returned if we attempt to parse a Read from the response Body
+// that doesn't begin with "data: ".
 var ErrBadPrefix = errors.New("unexpected event received")
 
 func parseEvents(b []byte) ([][]byte, error) {
