@@ -16,6 +16,7 @@ import (
 )
 
 const (
+	// Below are the defaults for calling OpenAI.
 	scheme   = "https"
 	host     = "api.openai.com"
 	basePath = "v1"
@@ -26,9 +27,26 @@ type Client struct {
 	token string
 	orgID *string
 
-	// scheme and host are only used for testing.
-	// TODO: Figure out a better approach.
-	scheme, host string
+	scheme, host, base, params string
+}
+
+// SetBaseURL configures the client to make requests to a different base URL.
+// If configuring a call to an Azure hosted endpoint, include the `api-version` parameter
+// in the passed URL string. E.g.
+//
+//	https://{your-resource-name}.openai.azure.com/openai/deployments/{deployment-id}/?api-version=2022-12-01
+func (c *Client) SetBaseURL(u string) error {
+	var parsed, err = url.Parse(u)
+	if err != nil {
+		return err
+	}
+
+	c.scheme = parsed.Scheme
+	c.host = parsed.Host
+	c.base = parsed.Path
+	c.params = parsed.RawQuery
+
+	return nil
 }
 
 // NewClient creates new OpenAI API client.
@@ -37,6 +55,7 @@ func NewClient(token string) *Client {
 		token:  token,
 		scheme: scheme,
 		host:   host,
+		base:   basePath,
 	}
 }
 
@@ -47,6 +66,7 @@ func NewClientWithOrg(token, org string) *Client {
 		orgID:  &org,
 		scheme: scheme,
 		host:   host,
+		base:   basePath,
 	}
 }
 
@@ -238,9 +258,10 @@ func (c *Client) delete(ctx context.Context, path string) ([]byte, error) {
 
 func (c *Client) reqURL(route string) string {
 	var u = &url.URL{
-		Scheme: c.scheme,
-		Host:   c.host,
-		Path:   path.Join(basePath, route),
+		Scheme:   c.scheme,
+		Host:     c.host,
+		Path:     path.Join(c.base, route),
+		RawQuery: c.params,
 	}
 
 	return u.String()
