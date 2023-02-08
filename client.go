@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	// Above are the generic OpenAI values.
+	// Below are the defaults for calling OpenAI.
 	scheme   = "https"
 	host     = "api.openai.com"
 	basePath = "v1"

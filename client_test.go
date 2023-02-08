@@ -81,8 +81,6 @@ func newTestClient(u string) (*Client, error) {
 		return nil, err
 	}
 
-	fmt.Println(u + "/v1")
-
 	return client, nil
 }
 
