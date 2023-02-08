@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -77,16 +76,14 @@ func TestAPI(t *testing.T) {
 }
 
 func newTestClient(u string) (*Client, error) {
-	var h, err = url.Parse(u)
-	if err != nil {
+	var client = NewClient(testToken)
+	if err := client.SetBaseURL(u + "/v1"); err != nil {
 		return nil, err
 	}
 
-	return &Client{
-		token:  testToken,
-		host:   h.Host,
-		scheme: "http",
-	}, nil
+	fmt.Println(u + "/v1")
+
+	return client, nil
 }
 
 // TestCompletions Tests the completions endpoint of the API using the mocked server.
