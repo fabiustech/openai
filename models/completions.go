@@ -6,7 +6,7 @@ package models
 type Completion int
 
 const (
-	// UnknownCompletion represents and invalid Completion model.
+	// UnknownCompletion represents an invalid Completion model.
 	UnknownCompletion Completion = iota
 	// TextDavinci003 is the most capable GPT-3 model. Can do any task the other models can do,
 	// often with higher quality, longer output and better instruction-following. Also supports

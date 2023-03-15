@@ -28,6 +28,8 @@ const (
 	// Engine represents an engine.
 	// Deprecated: use Model instead.
 	Engine
+
+	ChatCompletion
 )
 
 // String implements the fmt.Stringer interface.
@@ -64,6 +66,7 @@ var objectToString = map[Object]string{
 	FineTune:       "fine-tune",
 	FineTimeEvent:  "fine-tune-event",
 	Engine:         "engine",
+	ChatCompletion: "chat.completion",
 }
 
 var stringToObject = map[string]Object{
@@ -77,4 +80,5 @@ var stringToObject = map[string]Object{
 	"fine-tune":       FineTune,
 	"fine-tune-event": FineTimeEvent,
 	"engine":          Engine,
+	"chat.completion": ChatCompletion,
 }
