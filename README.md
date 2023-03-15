@@ -42,7 +42,7 @@ func main() {
 	var key, ok = os.LookupEnv("OPENAI_API_KEY")
 	if !ok {
 		panic("env variable OPENAI_API_KEY not set")
-    }
+	}
 	var c = openai.NewClient(key)
 
 	var resp, err = c.CreateCompletion(context.Background(), &openai.CompletionRequest[models.Completion]{
