@@ -39,7 +39,7 @@ type ChatCompletionRequest struct {
 	// Messages are the messages to generate chat completions for, in the chat format.
 	Messages []*ChatMessage `json:"messages"`
 	// Temperature specifies what sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the
-	//output more random, while lower values like 0.2 will make it more focused and deterministic. OpenAI generally
+	// output more random, while lower values like 0.2 will make it more focused and deterministic. OpenAI generally
 	// recommends altering this or top_p but not both.
 	// Defaults to 1.
 	Temperature *float64 `json:"temperature,omitempty"`
