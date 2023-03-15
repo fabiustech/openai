@@ -28,7 +28,7 @@ const (
 	// Engine represents an engine.
 	// Deprecated: use Model instead.
 	Engine
-
+	// ChatCompletion represents a chat completion.
 	ChatCompletion
 )
 
