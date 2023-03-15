@@ -21,15 +21,15 @@ const (
 	GPT4
 	// GPT4_0314 is a snapshot of gpt-4 from March 14th 2023. Unlike gpt-4, this model will not receive updates, and
 	// will only be supported for a three month period ending on June 14th 2023.
-	//nolint:var-naming // This would be unreadable otherwise.
+	//nolint:revive // This would be unreadable otherwise.
 	GPT4_0314
 	// GPT4_32K has the same capabilities as the base gpt-4 mode but with 4x the context length.
 	// Will be updated with our latest model iteration.
-	//nolint:var-naming // This would be unreadable otherwise.
+	//nolint:revive // This would be unreadable otherwise.
 	GPT4_32K
 	// GPT4_32K_0314 is a snapshot of gpt-4-32 from March 14th 2023. Unlike gpt-4-32k, this model will not receive
 	// updates, and will only be supported for a three month period ending on June 14th 2023.
-	//nolint:var-naming // This would be unreadable otherwise.
+	//nolint:revive // This would be unreadable otherwise.
 	GPT4_32K_0314
 )
 
