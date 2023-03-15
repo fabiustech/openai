@@ -2,7 +2,7 @@
 [![GoDoc](http://img.shields.io/badge/GoDoc-Reference-blue.svg)](https://godoc.org/github.com/fabiustech/openai)
 [![Go Report Card](https://goreportcard.com/badge/github.com/sashabaranov/go-gpt3)](https://goreportcard.com/report/github.com/fabiustech/openai)
 
-Zero dependency Go Client for [OpenAI](https://beta.openai.com/) API endpoints. Built upon the great work done [here](https://github.com/sashabaranov/go-gpt3).
+Zero dependency (Unofficial) Go Client for [OpenAI](https://beta.openai.com/) API endpoints. Built upon the great work done [here](https://github.com/sashabaranov/go-gpt3).
 
 ### Goals
 
@@ -31,6 +31,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	
 	"github.com/fabiustech/openai"
 	"github.com/fabiustech/openai/models"
@@ -38,13 +39,17 @@ import (
 )
 
 func main() {
-	var c = openai.NewClient("your token")
+	var key, ok = os.LookupEnv("OPENAI_API_KEY")
+	if !ok {
+		panic("env variable OPENAI_API_KEY not set")
+    }
+	var c = openai.NewClient(key)
 
-	var resp, err = c.CreateCompletion(context.Background(), &openai.CompletionRequest{
+	var resp, err = c.CreateCompletion(context.Background(), &openai.CompletionRequest[models.Completion]{
 		Model:       models.TextDavinci003,
 		MaxTokens:   100,
 		Prompt:      "Lorem ipsum",
-		Temperature: params.Optional(0),
+		Temperature: params.Optional(0.0),
 	})
 	if err != nil {
 		return
