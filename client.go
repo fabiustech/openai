@@ -271,14 +271,14 @@ func interpretResponse(resp *http.Response) error {
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusBadRequest {
 		var b, err = io.ReadAll(resp.Body)
 		if err != nil {
-			return fmt.Errorf("error, status code: %d", resp.StatusCode)
+			return fmt.Errorf("error, HTTP status code: %d", resp.StatusCode)
 		}
-		var er = &errorResponse{}
-		if err = json.Unmarshal(b, er); err != nil || er.Error == nil {
-			return fmt.Errorf("error, status code: %d, msg: %s", resp.StatusCode, string(b))
+		var er = &responseError{}
+		if err = json.Unmarshal(b, er); err != nil || er.Err == nil {
+			return fmt.Errorf("error, HTTP status code: %d, msg: %s", resp.StatusCode, string(b))
 		}
 
-		return er.Error
+		return er
 	}
 
 	return nil
