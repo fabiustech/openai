@@ -273,7 +273,7 @@ func interpretResponse(resp *http.Response) error {
 		if err != nil {
 			return fmt.Errorf("error, HTTP status code: %d", resp.StatusCode)
 		}
-		var er = &errorResponse{}
+		var er = &responseError{}
 		if err = json.Unmarshal(b, er); err != nil || er.Err == nil {
 			return fmt.Errorf("error, HTTP status code: %d, msg: %s", resp.StatusCode, string(b))
 		}

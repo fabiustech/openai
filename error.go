@@ -5,19 +5,19 @@ import (
 	"net/http"
 )
 
-// errorResponse wraps the returned error.
-type errorResponse struct {
+// responseError wraps the returned error.
+type responseError struct {
 	ID  string `json:"id"`
 	Err *Error `json:"error,omitempty"`
 }
 
 // Error implements the error interface.
-func (e *errorResponse) Error() string {
+func (e *responseError) Error() string {
 	return fmt.Sprintf("Request ID: %s, Code: %v, Message: %s, Type: %s, Param: %v", e.ID, e.Err.Code, e.Err.Message, e.Err.Type, e.Err.Param)
 }
 
 // Retryable returns true if the error is retryable.
-func (e *errorResponse) Retryable() bool {
+func (e *responseError) Retryable() bool {
 	if e.Err.Code >= http.StatusInternalServerError {
 		return true
 	}
