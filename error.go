@@ -5,6 +5,10 @@ import (
 	"net/http"
 )
 
+type retryableError struct {
+	Err *Error `json:"error"`
+}
+
 // Error represents an error response from the API.
 type Error struct {
 	Code    int     `json:"code"`
