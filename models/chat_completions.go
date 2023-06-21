@@ -35,6 +35,8 @@ const (
 	// Deprecated.
 	GPT4_0314
 
+	// GPT4_0613 includes an updated and improved model with function calling.
+	//nolint:revive,stylecheck // This would be unreadable otherwise.
 	GPT4_0613
 	// GPT4_32K has the same capabilities as the base gpt-4 mode but with 4x the context length.
 	// Will be updated with our latest model iteration.
@@ -45,6 +47,10 @@ const (
 	// Deprecated.
 	//nolint:revive,stylecheck // This would be unreadable otherwise.
 	GPT4_32K_0314
+	// GPT4_32K_0613 includes the same improvements as gpt-4-0613, along with an extended context length for better
+	// comprehension of larger texts.
+	//nolint:revive,stylecheck // This would be unreadable otherwise.
+	GPT4_32K_0613
 )
 
 // String implements the fmt.Stringer interface.
@@ -80,6 +86,7 @@ var chatCompletionToString = map[ChatCompletion]string{
 	GPT4_0314:         "gpt-4-0314",
 	GPT4_32K:          "gpt-4-32k",
 	GPT4_32K_0314:     "gpt-4-32k-0314",
+	GPT4_32K_0613:     "gpt-4-32k-0613",
 }
 
 var stringToChatCompletion = map[string]ChatCompletion{
@@ -92,4 +99,5 @@ var stringToChatCompletion = map[string]ChatCompletion{
 	"gpt-4-0613":         GPT4_0613,
 	"gpt-4-32k":          GPT4_32K,
 	"gpt-4-32k-0314":     GPT4_32K_0314,
+	"gpt-4-32k-0613":     GPT4_32K_0613,
 }
