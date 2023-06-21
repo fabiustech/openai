@@ -3,9 +3,11 @@ package openai
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/fabiustech/openai/models"
 	"github.com/fabiustech/openai/objects"
+	"github.com/fabiustech/openai/params"
 	"github.com/fabiustech/openai/routes"
 )
 
@@ -21,23 +23,97 @@ const (
 	// Assistant represents a message from the assistant. Assistant messages help store prior responses. They can also
 	// be written by a developer to help give examples of desired behavior.
 	Assistant ChatRole = "assistant"
+	// RoleFunction represents a call to a function.
+	RoleFunction ChatRole = "function"
 )
+
+// FunctionCallResponse represents a response from a function call.
+type FunctionCallResponse struct {
+	// Name is the name of the function to be called.
+	Name string `json:"name"`
+	// Arguments are the arguments to the function call, encoded as a JSON string.
+	Arguments string `json:"arguments"`
+}
 
 // ChatMessage represents a message in a chat completion.
 type ChatMessage struct {
-	Role    ChatRole `json:"role"`
-	Content string   `json:"content"`
+	Role         ChatRole              `json:"role"`
+	Content      string                `json:"content,omitempty"`
+	FunctionCall *FunctionCallResponse `json:"function_call,omitempty"`
+}
+
+// Unmarshal unmarshals the content of the message into the provided value.
+func (c *FunctionCallResponse) Unmarshal(val any) error {
+	return json.Unmarshal([]byte(c.Arguments), val)
+}
+
+// Function is a list of functions the model may generate JSON inputs for.
+type Function struct {
+	// Name is the name of the function to be called. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a
+	// maximum length of 64.
+	Name string `json:"name"`
+	// Description is the description of what the function does.
+	Description string `json:"description"`
+	// Parameters are the parameters the functions accepts, described as a JSON Schema object. See the guide
+	// (https://platform.openai.com/docs/guides/gpt/function-calling) for examples, and the JSON Schema reference
+	// (https://json-schema.org/understanding-json-schema/) for documentation about the format.
+	// TODO: Is there a stronger typed representation of this w/o adding a dependency?
+	Parameters json.RawMessage `json:"parameters"`
 }
 
 // TODO(Andy): Support streaming.
 
+const (
+	functionCallNone = "none"
+	functionCallAuto = "auto"
+)
+
+// FunctionCall specifies that the model should explicitly call the |Name|d function.
+// To specify that the model should not call a function, use FunctionCallNone.
+// To specify the default behavior, use FunctionCallAuto.
+type FunctionCall struct {
+	Name         string `json:"name"`
+	returnString *string
+}
+
+// MarshalJSON implements json.Marshaler.
+func (f *FunctionCall) MarshalJSON() ([]byte, error) {
+	if f.returnString != nil {
+		return []byte(fmt.Sprintf(`"%s"`, *f.returnString)), nil
+	}
+	return json.Marshal(struct {
+		Name string `json:"name"`
+	}{
+		Name: f.Name,
+	})
+}
+
+// FunctionCallNone returns a FunctionCall which will specify that no function should be called.
+func FunctionCallNone() *FunctionCall {
+	return &FunctionCall{returnString: params.Optional(functionCallNone)}
+}
+
+// FunctionCallAuto returns a FunctionCall which will specify that the model should pick between an end-user or
+// calling a function.
+func FunctionCallAuto() *FunctionCall {
+	return &FunctionCall{returnString: params.Optional(functionCallAuto)}
+}
+
 // ChatCompletionRequest contains all relevant fields for requests to the chat completions endpoint.
 type ChatCompletionRequest struct {
 	// Model specifies the ID of the model to use.
-	// See more here: https://platform.openai.com/docs/models/overview
+	// See more here: https://platform.openai.com/docs/models/overview.
 	Model models.ChatCompletion `json:"model"`
 	// Messages are the messages to generate chat completions for, in the chat format.
 	Messages []*ChatMessage `json:"messages"`
+	// Functions are a list of functions the model may generate JSON inputs for.
+	Functions []*Function `json:"functions,omitempty"`
+	// FunctionCall controls how the model responds to function calls. "none" means the model does not call a function,
+	// and responds to the end-user. "auto" means the model can pick between an end-user or calling a function.
+	// Specifying a particular function via {"name":\ "my_function"} forces the model to call that function.
+	// "none" is the default when no functions are present. "auto" is the default if functions are present.
+	// Use FunctionCallByName to generate a FunctionCall value which will explicitly call a function named |name|.
+	FunctionCall *FunctionCall `json:"function_call,omitempty"`
 	// Temperature specifies what sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the
 	// output more random, while lower values like 0.2 will make it more focused and deterministic. OpenAI generally
 	// recommends altering this or top_p but not both.
