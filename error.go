@@ -5,16 +5,17 @@ import (
 	"net/http"
 )
 
-type retryableError struct {
+type wrappedError struct {
 	Err *Error `json:"error"`
 }
 
 // Error represents an error response from the API.
 type Error struct {
-	Code    int     `json:"code"`
-	Message string  `json:"message"`
-	Param   *string `json:"param,omitempty"`
-	Type    string  `json:"type"`
+	StatusCode int     `json:"statusCode"`
+	Code       string  `json:"code"`
+	Message    string  `json:"message"`
+	Param      *string `json:"param,omitempty"`
+	Type       string  `json:"type"`
 }
 
 // Error implements the error interface.
@@ -24,8 +25,8 @@ func (e *Error) Error() string {
 
 // Retryable returns true if the error is retryable.
 func (e *Error) Retryable() bool {
-	if e.Code >= http.StatusInternalServerError || e.Code == 0 {
+	if e.StatusCode >= http.StatusInternalServerError {
 		return true
 	}
-	return e.Code == http.StatusTooManyRequests
+	return e.StatusCode == http.StatusTooManyRequests
 }
