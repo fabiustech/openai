@@ -43,4 +43,10 @@ const (
 	// Moderations is the route for the moderations endpoint.
 	// https://platform.openai.com/docs/api-reference/moderations
 	Moderations = "moderations"
+
+	audioBase = "audio/"
+
+	// AudioTranscriptions is the route for the transcriptions endpoint.
+	// https://platform.openai.com/docs/api-reference/audio/create
+	AudioTranscriptions = audioBase + "transcriptions"
 )

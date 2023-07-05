@@ -173,6 +173,69 @@ func (c *Client) postStream(ctx context.Context, path string, payload any) (<-ch
 	return events, errCh, nil
 }
 
+// TODO: Combine logic for postAudio and postFile into single "generic" method (postFormData, or similar).
+
+func (c *Client) postAudio(ctx context.Context, ar *AudioTranscriptionRequest) ([]byte, error) {
+	var b bytes.Buffer
+	var w = multipart.NewWriter(&b)
+
+	if err := w.WriteField("model", ar.Model.String()); err != nil {
+		return nil, err
+	}
+
+	if ar.ResponseFormat != nil {
+		if err := w.WriteField("response_format", ar.ResponseFormat.String()); err != nil {
+			return nil, err
+		}
+	}
+
+	if ar.Temperature != nil {
+		if err := w.WriteField("temperature", fmt.Sprintf("%f", *ar.Temperature)); err != nil {
+			return nil, err
+		}
+	}
+
+	if ar.Language != nil {
+		if err := w.WriteField("language", *ar.Language); err != nil {
+			return nil, err
+		}
+	}
+
+	var fw, err = w.CreateFormFile("file", ar.File.Name())
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err = io.Copy(fw, ar.File); err != nil {
+		return nil, err
+	}
+
+	if err = w.Close(); err != nil {
+		return nil, err
+	}
+
+	var req *http.Request
+	req, err = c.newRequest(ctx, "POST", c.reqURL(routes.AudioTranscriptions), &b)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", w.FormDataContentType())
+
+	var resp *http.Response
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if err = interpretResponse(resp); err != nil {
+		return nil, err
+	}
+
+	return io.ReadAll(resp.Body)
+}
+
 func (c *Client) postFile(ctx context.Context, fr *FileRequest) ([]byte, error) {
 	var b bytes.Buffer
 	var w = multipart.NewWriter(&b)
