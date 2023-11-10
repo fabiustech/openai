@@ -5,6 +5,7 @@ type Audio int
 const (
 	UnknownAudioModel Audio = iota
 	Whisper1
+	Whisper2
 )
 
 // String implements the fmt.Stringer interface.
@@ -32,8 +33,10 @@ func (a *Audio) UnmarshalText(b []byte) error {
 
 var audioToString = map[Audio]string{
 	Whisper1: "whisper-1",
+	Whisper2: "whisper-2",
 }
 
 var stringToAudio = map[string]Audio{
 	"whisper-1": Whisper1,
+	"whisper-2": Whisper2,
 }
