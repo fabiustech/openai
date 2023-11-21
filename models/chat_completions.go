@@ -22,6 +22,14 @@ const (
 	// single request.
 	GPT3Dot5Turbo16K
 
+	// GPT4Dot5Turbo1106 is a snapshot of gpt-3.5-turbo from November 6th 2023.
+	//
+	// Release Notes:
+	// In addition to GPT-4 Turbo, we are also releasing a new version of GPT-3.5 Turbo that supports a 16K context window by default.
+	// The new 3.5 Turbo supports improved instruction following, JSON mode, and parallel function calling.
+	// For instance, our internal evals show a 38% improvement on format following tasks such as generating JSON, XML and YAML. Developers can access this new model by calling gpt-3.5-turbo-1106 in the API.
+	GPT3Dot5Turbo1106
+
 	// GPT-4 models are currently in a limited beta and only accessible to those who have been granted access.
 	// Please join the waitlist to get access when capacity is available.
 	// https://openai.com/waitlist/gpt-4-api
@@ -51,6 +59,12 @@ const (
 	// comprehension of larger texts.
 	//nolint:revive,stylecheck // This would be unreadable otherwise.
 	GPT4_32K_0613
+
+	// GPT-4 Turbo (gpt-4-1106-preview) is more capable and has knowledge of world events up to April 2023. It has a 128k context window so it can fit the equivalent of more than 300 pages of text in a single prompt.
+	// We also optimized its performance so we are able to offer GPT-4 Turbo at a 3x cheaper price for input tokens and a 2x cheaper price for output tokens compared to GPT-4.
+	//
+	// GPT-4 Turbo is available for all paying developers to try by passing gpt-4-1106-preview in the API and we plan to release the stable production-ready model in the coming weeks.
+	GPT4Turbo1106Preview
 )
 
 // String implements the fmt.Stringer interface.
@@ -77,16 +91,18 @@ func (c *ChatCompletion) UnmarshalText(b []byte) error {
 }
 
 var chatCompletionToString = map[ChatCompletion]string{
-	GPT3Dot5Turbo:     "gpt-3.5-turbo",
-	GPT3Dot5Turbo0301: "gpt-3.5-turbo-0301",
-	GPT3Dot5Turbo0613: "gpt-3.5-turbo-0613",
-	GPT3Dot5Turbo16K:  "gpt-3.5-turbo-16k",
-	GPT4:              "gpt-4",
-	GPT4_0613:         "gpt-4-0613",
-	GPT4_0314:         "gpt-4-0314",
-	GPT4_32K:          "gpt-4-32k",
-	GPT4_32K_0314:     "gpt-4-32k-0314",
-	GPT4_32K_0613:     "gpt-4-32k-0613",
+	GPT3Dot5Turbo:        "gpt-3.5-turbo",
+	GPT3Dot5Turbo0301:    "gpt-3.5-turbo-0301",
+	GPT3Dot5Turbo0613:    "gpt-3.5-turbo-0613",
+	GPT3Dot5Turbo16K:     "gpt-3.5-turbo-16k",
+	GPT3Dot5Turbo1106:    "gpt-3.5-turbo-1106",
+	GPT4:                 "gpt-4",
+	GPT4_0613:            "gpt-4-0613",
+	GPT4_0314:            "gpt-4-0314",
+	GPT4_32K:             "gpt-4-32k",
+	GPT4_32K_0314:        "gpt-4-32k-0314",
+	GPT4_32K_0613:        "gpt-4-32k-0613",
+	GPT4Turbo1106Preview: "gpt-4-1106-preview",
 }
 
 var stringToChatCompletion = map[string]ChatCompletion{
@@ -94,10 +110,12 @@ var stringToChatCompletion = map[string]ChatCompletion{
 	"gpt-3.5-turbo-0301": GPT3Dot5Turbo0301,
 	"gpt-3.5-turbo-0613": GPT3Dot5Turbo0613,
 	"gpt-3.5-turbo-16k":  GPT3Dot5Turbo16K,
+	"gpt-3.5-turbo-1106": GPT3Dot5Turbo1106,
 	"gpt-4":              GPT4,
 	"gpt-4-0314":         GPT4_0314,
 	"gpt-4-0613":         GPT4_0613,
 	"gpt-4-32k":          GPT4_32K,
 	"gpt-4-32k-0314":     GPT4_32K_0314,
 	"gpt-4-32k-0613":     GPT4_32K_0613,
+	"gpt-4-1106-preview": GPT4Turbo1106Preview,
 }
