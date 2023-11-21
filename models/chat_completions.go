@@ -59,6 +59,12 @@ const (
 	// comprehension of larger texts.
 	//nolint:revive,stylecheck // This would be unreadable otherwise.
 	GPT4_32K_0613
+
+	// GPT-4 Turbo (gpt-4-1106-preview) is more capable and has knowledge of world events up to April 2023. It has a 128k context window so it can fit the equivalent of more than 300 pages of text in a single prompt.
+	//We also optimized its performance so we are able to offer GPT-4 Turbo at a 3x cheaper price for input tokens and a 2x cheaper price for output tokens compared to GPT-4.
+	//
+	// GPT-4 Turbo is available for all paying developers to try by passing gpt-4-1106-preview in the API and we plan to release the stable production-ready model in the coming weeks.
+	GPT4_Turbo_1106_Preview
 )
 
 // String implements the fmt.Stringer interface.
@@ -85,17 +91,18 @@ func (c *ChatCompletion) UnmarshalText(b []byte) error {
 }
 
 var chatCompletionToString = map[ChatCompletion]string{
-	GPT3Dot5Turbo:     "gpt-3.5-turbo",
-	GPT3Dot5Turbo0301: "gpt-3.5-turbo-0301",
-	GPT3Dot5Turbo0613: "gpt-3.5-turbo-0613",
-	GPT3Dot5Turbo16K:  "gpt-3.5-turbo-16k",
-	GPT3Dot5Turbo1106: "gpt-3.5-turbo-1106",
-	GPT4:              "gpt-4",
-	GPT4_0613:         "gpt-4-0613",
-	GPT4_0314:         "gpt-4-0314",
-	GPT4_32K:          "gpt-4-32k",
-	GPT4_32K_0314:     "gpt-4-32k-0314",
-	GPT4_32K_0613:     "gpt-4-32k-0613",
+	GPT3Dot5Turbo:           "gpt-3.5-turbo",
+	GPT3Dot5Turbo0301:       "gpt-3.5-turbo-0301",
+	GPT3Dot5Turbo0613:       "gpt-3.5-turbo-0613",
+	GPT3Dot5Turbo16K:        "gpt-3.5-turbo-16k",
+	GPT3Dot5Turbo1106:       "gpt-3.5-turbo-1106",
+	GPT4:                    "gpt-4",
+	GPT4_0613:               "gpt-4-0613",
+	GPT4_0314:               "gpt-4-0314",
+	GPT4_32K:                "gpt-4-32k",
+	GPT4_32K_0314:           "gpt-4-32k-0314",
+	GPT4_32K_0613:           "gpt-4-32k-0613",
+	GPT4_Turbo_1106_Preview: "gpt-4-1106-preview",
 }
 
 var stringToChatCompletion = map[string]ChatCompletion{
@@ -110,4 +117,5 @@ var stringToChatCompletion = map[string]ChatCompletion{
 	"gpt-4-32k":          GPT4_32K,
 	"gpt-4-32k-0314":     GPT4_32K_0314,
 	"gpt-4-32k-0613":     GPT4_32K_0613,
+	"gpt-4-1106-preview": GPT4_Turbo_1106_Preview,
 }
