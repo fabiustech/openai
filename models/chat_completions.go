@@ -22,6 +22,14 @@ const (
 	// single request.
 	GPT3Dot5Turbo16K
 
+	// GPT4Dot5Turbo1106 is a snapshot of gpt-3.5-turbo from November 6th 2023.
+	//
+	// Release Notes:
+	// In addition to GPT-4 Turbo, we are also releasing a new version of GPT-3.5 Turbo that supports a 16K context window by default.
+	// The new 3.5 Turbo supports improved instruction following, JSON mode, and parallel function calling.
+	// For instance, our internal evals show a 38% improvement on format following tasks such as generating JSON, XML and YAML. Developers can access this new model by calling gpt-3.5-turbo-1106 in the API.
+	GPT3Dot5Turbo1106
+
 	// GPT-4 models are currently in a limited beta and only accessible to those who have been granted access.
 	// Please join the waitlist to get access when capacity is available.
 	// https://openai.com/waitlist/gpt-4-api
@@ -81,6 +89,7 @@ var chatCompletionToString = map[ChatCompletion]string{
 	GPT3Dot5Turbo0301: "gpt-3.5-turbo-0301",
 	GPT3Dot5Turbo0613: "gpt-3.5-turbo-0613",
 	GPT3Dot5Turbo16K:  "gpt-3.5-turbo-16k",
+	GPT3Dot5Turbo1106: "gpt-3.5-turbo-1106",
 	GPT4:              "gpt-4",
 	GPT4_0613:         "gpt-4-0613",
 	GPT4_0314:         "gpt-4-0314",
@@ -94,6 +103,7 @@ var stringToChatCompletion = map[string]ChatCompletion{
 	"gpt-3.5-turbo-0301": GPT3Dot5Turbo0301,
 	"gpt-3.5-turbo-0613": GPT3Dot5Turbo0613,
 	"gpt-3.5-turbo-16k":  GPT3Dot5Turbo16K,
+	"gpt-3.5-turbo-1106": GPT3Dot5Turbo1106,
 	"gpt-4":              GPT4,
 	"gpt-4-0314":         GPT4_0314,
 	"gpt-4-0613":         GPT4_0613,
