@@ -120,7 +120,7 @@ var chatCompletionToString = map[ChatCompletion]string{
 	GPT4Turbo0125Preview: "gpt-4-0125-preview",
 	GPT4TurboPreview:     "gpt-4-turbo-preview",
 	GPT4o:                "gpt-4o",
-	GPT4o20240503:        "ggpt-4o-2024-05-13",
+	GPT4o20240503:        "gpt-4o-2024-05-13",
 }
 
 var stringToChatCompletion = map[string]ChatCompletion{
@@ -140,5 +140,5 @@ var stringToChatCompletion = map[string]ChatCompletion{
 	"gpt-4-0125-preview":  GPT4Turbo0125Preview,
 	"gpt-4-turbo-preview": GPT4TurboPreview,
 	"gpt-4o":              GPT4o,
-	"ggpt-4o-2024-05-13":  GPT4o20240503,
+	"gpt-4o-2024-05-13":   GPT4o20240503,
 }
