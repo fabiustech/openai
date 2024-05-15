@@ -70,6 +70,14 @@ const (
 	// GPT4TurboPreview (GPT-4 Turbo) is the latest GPT-4. It currently points to gpt-4-0125-preview, however, may
 	// receive updates in the future.
 	GPT4TurboPreview
+
+	// GPT4o (GPT-4o) is the most advanced model. It is multimodal (accepting text or image inputs and outputting text),
+	// and it has the same high intelligence as GPT-4 Turbo but is much more efficient—it generates text 2x faster and
+	// is 50% cheaper. Additionally, GPT-4o has the best vision and performance across non-English languages of any model.
+	GPT4o
+
+	// GPT4o20240503 is a snapshot of gpt-4o from May 13th, 2024.
+	GPT4o20240503
 )
 
 // String implements the fmt.Stringer interface.
@@ -111,6 +119,8 @@ var chatCompletionToString = map[ChatCompletion]string{
 	GPT4Turbo1106Preview: "gpt-4-1106-preview",
 	GPT4Turbo0125Preview: "gpt-4-0125-preview",
 	GPT4TurboPreview:     "gpt-4-turbo-preview",
+	GPT4o:                "gpt-4o",
+	GPT4o20240503:        "gpt-4o-2024-05-13",
 }
 
 var stringToChatCompletion = map[string]ChatCompletion{
@@ -129,4 +139,6 @@ var stringToChatCompletion = map[string]ChatCompletion{
 	"gpt-4-1106-preview":  GPT4Turbo1106Preview,
 	"gpt-4-0125-preview":  GPT4Turbo0125Preview,
 	"gpt-4-turbo-preview": GPT4TurboPreview,
+	"gpt-4o":              GPT4o,
+	"gpt-4o-2024-05-13":   GPT4o20240503,
 }
