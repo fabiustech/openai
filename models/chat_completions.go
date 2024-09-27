@@ -78,6 +78,16 @@ const (
 
 	// GPT4o20240503 is a snapshot of gpt-4o from May 13th, 2024.
 	GPT4o20240503
+
+	// O1Preview is a part of the o1 series of large language models, which are trained with reinforcement learning to
+	// perform complex reasoning. o1 models think before they answer, producing a long internal chain of thought before
+	// responding to the user.
+	O1Preview
+
+	// O1Mini is a part of the o1 series of large language models, which are trained with reinforcement learning to
+	// perform complex reasoning. o1 models think before they answer, producing a long internal chain of thought before
+	// responding to the user.
+	O1Mini
 )
 
 // String implements the fmt.Stringer interface.
@@ -121,6 +131,8 @@ var chatCompletionToString = map[ChatCompletion]string{
 	GPT4TurboPreview:     "gpt-4-turbo-preview",
 	GPT4o:                "gpt-4o",
 	GPT4o20240503:        "gpt-4o-2024-05-13",
+	O1Preview:            "o1-preview",
+	O1Mini:               "o1-mini",
 }
 
 var stringToChatCompletion = map[string]ChatCompletion{
@@ -141,4 +153,6 @@ var stringToChatCompletion = map[string]ChatCompletion{
 	"gpt-4-turbo-preview": GPT4TurboPreview,
 	"gpt-4o":              GPT4o,
 	"gpt-4o-2024-05-13":   GPT4o20240503,
+	"o1-preview":          O1Preview,
+	"o1-mini":             O1Mini,
 }
