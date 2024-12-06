@@ -79,6 +79,10 @@ const (
 	// GPT4o20240503 is a snapshot of gpt-4o from May 13th, 2024.
 	GPT4o20240503
 
+	// GPT4oMini is OpenAIs most cost-efficient small model that’s smarter and cheaper than GPT-3.5 Turbo, and has
+	// vision capabilities. The model has 128K context and an October 2023 knowledge cutoff.
+	GPT4oMini
+
 	// O1Preview is a part of the o1 series of large language models, which are trained with reinforcement learning to
 	// perform complex reasoning. o1 models think before they answer, producing a long internal chain of thought before
 	// responding to the user.
@@ -131,6 +135,7 @@ var chatCompletionToString = map[ChatCompletion]string{
 	GPT4TurboPreview:     "gpt-4-turbo-preview",
 	GPT4o:                "gpt-4o",
 	GPT4o20240503:        "gpt-4o-2024-05-13",
+	GPT4oMini:            "gpt-4o-mini",
 	O1Preview:            "o1-preview",
 	O1Mini:               "o1-mini",
 }
@@ -153,6 +158,7 @@ var stringToChatCompletion = map[string]ChatCompletion{
 	"gpt-4-turbo-preview": GPT4TurboPreview,
 	"gpt-4o":              GPT4o,
 	"gpt-4o-2024-05-13":   GPT4o20240503,
+	"gpt-4o-mini":         GPT4oMini,
 	"o1-preview":          O1Preview,
 	"o1-mini":             O1Mini,
 }
